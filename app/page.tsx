@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { InteractiveAttendanceChart } from "@/components/interactive-attendance-chart"
-import { useLanguage } from "@/components/language-context"
+import { useLanguage } from "@/contexts/language-context"
 
 const todaysMeetings = [
   { name: "Mariam Osama", date: "12/12/2022", duration: "2 Hours" },

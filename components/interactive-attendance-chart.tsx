@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts"
-import { useLanguage } from "@/components/language-context"
+import { useLanguage } from "@/contexts/language-context"
 
 const attendanceData = [
   { month: "Jan", attendance: 25, permission: 15, vacation: 5 },

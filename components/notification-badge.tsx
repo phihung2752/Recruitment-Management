@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useLanguage } from "@/components/language-context"
+import { useLanguage } from "@/contexts/language-context"
 
 export function NotificationBadge() {
   const [notificationCount, setNotificationCount] = useState(0)

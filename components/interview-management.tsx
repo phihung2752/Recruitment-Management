@@ -3,6 +3,9 @@
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { InterviewRoundsConfig } from "./interview-rounds-config"
 import { CandidateList } from "./candidate-list"
 import { CandidateInterviewTracking } from "./candidate-interview-tracking"
@@ -36,6 +39,30 @@ export interface InterviewRound {
 }
 
 export default function InterviewManagement() {
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const tabs = [
+    { value: "candidates", label: "Candidates" },
+    { value: "rounds", label: "Rounds" },
+    { value: "scheduler", label: "Scheduler" },
+    { value: "notifications", label: "Notifications" },
+    { value: "online", label: "Online" },
+    { value: "in-person", label: "In-Person" },
+    { value: "results", label: "Results" },
+    { value: "evaluation", label: "Evaluation" },
+    { value: "feedback", label: "Feedback" },
+    { value: "questions", label: "Questions" },
+    { value: "analytics", label: "Analytics" },
+    { value: "ai-assistant", label: "AI Assistant" },
+  ]
+
+  const nextTab = () => {
+    setActiveTabIndex((prev) => (prev + 1) % tabs.length)
+  }
+
+  const prevTab = () => {
+    setActiveTabIndex((prev) => (prev - 1 + tabs.length) % tabs.length)
+  }
+
   const [candidates, setCandidates] = useState<Candidate[]>([
     { id: "1", name: "John Smith", jobTitle: "Senior Developer", currentRound: 1, status: "pending", email: "john@example.com" },
     { id: "2", name: "Alice Johnson", jobTitle: "Frontend Developer", currentRound: 2, status: "pending", email: "alice@example.com" },
@@ -64,57 +91,53 @@ export default function InterviewManagement() {
 
   return (
     <Card className="min-h-screen bg-background">
-      <CardContent className="p-6">
-        <div className="space-y-6">
+      <CardContent className="p-2 sm:p-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between border-b pb-4">
-            <h1 className="text-3xl font-bold tracking-tight">Interview Management</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Interview Management</h1>
+            <div className="hidden md:flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={prevTab}
+                className="hidden md:flex"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={nextTab}
+                className="hidden md:flex"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
-          <Tabs defaultValue="candidates" className="space-y-6">
-            <div className="sticky top-0 z-10 bg-background pt-2 pb-4 border-b">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 p-1 bg-muted rounded-lg">
-                <TabsTrigger value="candidates" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Candidates
-                </TabsTrigger>
-                <TabsTrigger value="rounds" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Interview Rounds
-                </TabsTrigger>
-                <TabsTrigger value="scheduler" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Scheduler
-                </TabsTrigger>
-                <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Notifications
-                </TabsTrigger>
-                <TabsTrigger value="online-interview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Online Interview
-                </TabsTrigger>
-                <TabsTrigger value="in-person-interview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  In-Person Interview
-                </TabsTrigger>
-                <TabsTrigger value="results" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Results
-                </TabsTrigger>
-                <TabsTrigger value="evaluation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Evaluation
-                </TabsTrigger>
-                <TabsTrigger value="feedback" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Feedback
-                </TabsTrigger>
-                <TabsTrigger value="questions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Questions
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  Analytics
-                </TabsTrigger>
-                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  AI Assistant
-                </TabsTrigger>
+          <Tabs 
+            defaultValue="candidates" 
+            value={tabs[activeTabIndex].value}
+            onValueChange={(value) => setActiveTabIndex(tabs.findIndex(tab => tab.value === value))}
+            className="space-y-4"
+          >
+            <ScrollArea className="w-full">
+              <TabsList className="inline-flex w-auto p-1 bg-muted rounded-lg">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="min-w-[100px] whitespace-nowrap"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
-            </div>
+            </ScrollArea>
             
-            <div className="mt-4 space-y-6">
-              <TabsContent value="candidates" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="mt-4 space-y-4">
+              <TabsContent value="candidates">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   <div className="lg:col-span-1">
                     <Card>
                       <CardContent className="p-4">
@@ -142,119 +165,75 @@ export default function InterviewManagement() {
               </TabsContent>
               
               <TabsContent value="rounds">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewRoundsConfig 
-                      rounds={interviewRounds} 
-                      setRounds={setInterviewRounds} 
-                    />
-                  </CardContent>
-                </Card>
+                <InterviewRoundsConfig 
+                  rounds={interviewRounds} 
+                  setRounds={setInterviewRounds} 
+                />
               </TabsContent>
 
               <TabsContent value="scheduler">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewScheduler 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+                <InterviewScheduler 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
               <TabsContent value="notifications">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewNotifications 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+                <InterviewNotifications 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
-              <TabsContent value="online-interview">
-                <Card>
-                  <CardContent className="p-4">
-                    <OnlineInterviewSupport 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+              <TabsContent value="online">
+                <OnlineInterviewSupport 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
-              <TabsContent value="in-person-interview">
-                <Card>
-                  <CardContent className="p-4">
-                    <InPersonInterviewManagement 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+              <TabsContent value="in-person">
+                <InPersonInterviewManagement 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
               <TabsContent value="results">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewResultsRecorder 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                      onUpdateStatus={updateCandidateStatus}
-                    />
-                  </CardContent>
-                </Card>
+                <InterviewResultsRecorder 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                  onUpdateStatus={updateCandidateStatus}
+                />
               </TabsContent>
 
               <TabsContent value="evaluation">
-                <Card>
-                  <CardContent className="p-4">
-                    <CandidateEvaluation 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+                <CandidateEvaluation 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
               <TabsContent value="feedback">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewFeedback 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+                <InterviewFeedback 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
 
               <TabsContent value="questions">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewQuestionsManager />
-                  </CardContent>
-                </Card>
+                <InterviewQuestionsManager />
               </TabsContent>
 
               <TabsContent value="analytics">
-                <Card>
-                  <CardContent className="p-4">
-                    <InterviewAnalytics />
-                  </CardContent>
-                </Card>
+                <InterviewAnalytics />
               </TabsContent>
 
               <TabsContent value="ai-assistant">
-                <Card>
-                  <CardContent className="p-4">
-                    <AIInterviewAssistant 
-                      candidates={candidates}
-                      interviewRounds={interviewRounds}
-                    />
-                  </CardContent>
-                </Card>
+                <AIInterviewAssistant 
+                  candidates={candidates}
+                  interviewRounds={interviewRounds}
+                />
               </TabsContent>
             </div>
           </Tabs>

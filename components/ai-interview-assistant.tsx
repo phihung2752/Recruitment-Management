@@ -19,6 +19,7 @@ export function AIInterviewAssistant({ candidates, interviewRounds }: AIIntervie
   const [interviewAnalysis, setInterviewAnalysis] = useState<string>("")
 
   const handleGenerateQuestions = () => {
+    // In a real application, this would call an AI service to generate questions
     const aiGeneratedQuestions = `
 1. Can you describe a challenging project you've worked on and how you overcame obstacles?
 2. How do you stay updated with the latest technologies in your field?
@@ -28,6 +29,7 @@ export function AIInterviewAssistant({ candidates, interviewRounds }: AIIntervie
   }
 
   const handleAnalyzeInterview = () => {
+    // In a real application, this would call an AI service to analyze the interview
     const aiGeneratedAnalysis = `
 Based on the candidate's responses:
 - Strong problem-solving skills demonstrated
@@ -89,3 +91,4 @@ Based on the candidate's responses:
     </Card>
   )
 }
+
