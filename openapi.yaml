@@ -1,0 +1,2179 @@
+openapi: 3.0.3
+info:
+  title: HR Management System API
+  description: Comprehensive HR Management System with recruitment, employee management, and analytics
+  version: 1.0.0
+  contact:
+    name: HR Management Team
+    email: support@hrmanagement.com
+
+servers:
+  - url: http://localhost:5009/api
+    description: Development server
+  - url: https://api.hrmanagement.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    put:
+      tags:
+        - Authentication
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  /auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  # Employee Endpoints
+  /employees:
+    get:
+      tags:
+        - Employees
+      summary: Get all employees
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employees retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeListResponse'
+    post:
+      tags:
+        - Employees
+      summary: Create new employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployeeRequest'
+      responses:
+        '201':
+          description: Employee created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employees/{id}:
+    get:
+      tags:
+        - Employees
+      summary: Get employee by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+    put:
+      tags:
+        - Employees
+      summary: Update employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployeeRequest'
+      responses:
+        '200':
+          description: Employee updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+    delete:
+      tags:
+        - Employees
+      summary: Delete employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Employee deleted successfully
+
+  /employees/{id}/status:
+    put:
+      tags:
+        - Employees
+      summary: Update employee status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: Employee status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  # Job Posts Endpoints
+  /jobposts:
+    get:
+      tags:
+        - Job Posts
+      summary: Get all job posts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Draft, Pending Approval, Approved, Published, Expired]
+        - name: department
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPostListResponse'
+    post:
+      tags:
+        - Job Posts
+      summary: Create new job post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobPostRequest'
+      responses:
+        '201':
+          description: Job post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPost'
+
+  /jobposts/{id}:
+    get:
+      tags:
+        - Job Posts
+      summary: Get job post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Job post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPost'
+    put:
+      tags:
+        - Job Posts
+      summary: Update job post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobPostRequest'
+      responses:
+        '200':
+          description: Job post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPost'
+    delete:
+      tags:
+        - Job Posts
+      summary: Delete job post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Job post deleted successfully
+
+  /jobposts/{id}/status:
+    put:
+      tags:
+        - Job Posts
+      summary: Update job post status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobPostStatusRequest'
+      responses:
+        '200':
+          description: Job post status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPost'
+
+  # Candidates Endpoints
+  /candidates:
+    get:
+      tags:
+        - Candidates
+      summary: Get all candidates
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [New, Screening, Interview, Technical, Final, Offer, Hired, Rejected]
+        - name: position
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Candidates retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateListResponse'
+    post:
+      tags:
+        - Candidates
+      summary: Create new candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCandidateRequest'
+      responses:
+        '201':
+          description: Candidate created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+
+  /candidates/{id}:
+    get:
+      tags:
+        - Candidates
+      summary: Get candidate by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Candidate retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateDetail'
+    put:
+      tags:
+        - Candidates
+      summary: Update candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCandidateRequest'
+      responses:
+        '200':
+          description: Candidate updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateDetail'
+    delete:
+      tags:
+        - Candidates
+      summary: Delete candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Candidate deleted successfully
+
+  /candidates/{id}/status:
+    put:
+      tags:
+        - Candidates
+      summary: Update candidate status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCandidateStatusRequest'
+      responses:
+        '200':
+          description: Candidate status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateDetail'
+
+  /candidates/{id}/cv:
+    post:
+      tags:
+        - Candidates
+      summary: Upload candidate CV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: CV uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateDetail'
+
+  # Interviews Endpoints
+  /interviews:
+    get:
+      tags:
+        - Interviews
+      summary: Get all interviews
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: candidateId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Scheduled, Completed, Cancelled]
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Interviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewListResponse'
+    post:
+      tags:
+        - Interviews
+      summary: Schedule new interview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleInterviewRequest'
+      responses:
+        '201':
+          description: Interview scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interview'
+
+  /interviews/today:
+    get:
+      tags:
+        - Interviews
+      summary: Get today's interviews
+      responses:
+        '200':
+          description: Today's interviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+
+  /interviews/{id}:
+    get:
+      tags:
+        - Interviews
+      summary: Get interview by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Interview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewDetail'
+    put:
+      tags:
+        - Interviews
+      summary: Update interview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInterviewRequest'
+      responses:
+        '200':
+          description: Interview updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewDetail'
+
+  /interviews/{id}/cancel:
+    put:
+      tags:
+        - Interviews
+      summary: Cancel interview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Interview cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /interviews/{id}/feedback:
+    post:
+      tags:
+        - Interviews
+      summary: Submit interview feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterviewFeedback'
+      responses:
+        '200':
+          description: Feedback submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterviewDetail'
+
+  /interviews/candidate/{candidateId}:
+    get:
+      tags:
+        - Interviews
+      summary: Get interviews by candidate ID
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Candidate interviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+
+  # Dashboard Endpoints
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      responses:
+        '200':
+          description: Dashboard statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+
+  /dashboard/attendance:
+    get:
+      tags:
+        - Dashboard
+      summary: Get attendance data
+      responses:
+        '200':
+          description: Attendance data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendanceData'
+
+  /dashboard/meetings/today:
+    get:
+      tags:
+        - Dashboard
+      summary: Get today's meetings
+      responses:
+        '200':
+          description: Today's meetings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meeting'
+
+  /dashboard/requests/today:
+    get:
+      tags:
+        - Dashboard
+      summary: Get today's requests
+      responses:
+        '200':
+          description: Today's requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Request'
+
+  /dashboard/jobs/status:
+    get:
+      tags:
+        - Dashboard
+      summary: Get job status distribution
+      responses:
+        '200':
+          description: Job status distribution retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobStatus'
+
+  /dashboard/departments/hiring:
+    get:
+      tags:
+        - Dashboard
+      summary: Get department hiring progress
+      responses:
+        '200':
+          description: Department hiring progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepartmentHiring'
+
+  # CV Management Endpoints
+  /cvs:
+    get:
+      tags:
+        - CV Management
+      summary: Get all CVs
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: skills
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: CVs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CVListResponse'
+    post:
+      tags:
+        - CV Management
+      summary: Create new CV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCVRequest'
+      responses:
+        '201':
+          description: CV created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CV'
+
+  /cvs/{id}:
+    put:
+      tags:
+        - CV Management
+      summary: Update CV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCVRequest'
+      responses:
+        '200':
+          description: CV updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CV'
+    delete:
+      tags:
+        - CV Management
+      summary: Delete CV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: CV deleted successfully
+
+  /cvs/upload:
+    post:
+      tags:
+        - CV Management
+      summary: Upload CV file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: CV uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CV'
+
+  /cvs/parse:
+    post:
+      tags:
+        - CV Management
+      summary: Parse CV file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: CV parsed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParsedCVData'
+
+  # Calendar Endpoints
+  /calendar/events:
+    get:
+      tags:
+        - Calendar
+      summary: Get calendar events
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [interview, meeting, deadline]
+      responses:
+        '200':
+          description: Calendar events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+    post:
+      tags:
+        - Calendar
+      summary: Create calendar event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCalendarEventRequest'
+      responses:
+        '201':
+          description: Calendar event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+
+  /calendar/events/{id}:
+    put:
+      tags:
+        - Calendar
+      summary: Update calendar event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCalendarEventRequest'
+      responses:
+        '200':
+          description: Calendar event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+
+  # User Management Endpoints
+  /users:
+    get:
+      tags:
+        - User Management
+      summary: Get all users
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, locked]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+    post:
+      tags:
+        - User Management
+      summary: Create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      tags:
+        - User Management
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User Management
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - User Management
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted successfully
+
+  /users/roles:
+    get:
+      tags:
+        - User Management
+      summary: Get all roles
+      responses:
+        '200':
+          description: Roles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+  /users/permissions:
+    get:
+      tags:
+        - User Management
+      summary: Get all permissions
+      responses:
+        '200':
+          description: Permissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+
+  /users/departments:
+    get:
+      tags:
+        - User Management
+      summary: Get all departments
+      responses:
+        '200':
+          description: Departments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Department'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Authentication Schemas
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+        department:
+          type: string
+        position:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+        language:
+          type: string
+        theme:
+          type: string
+          enum: [light, dark]
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        language:
+          type: string
+        theme:
+          type: string
+          enum: [light, dark]
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+        - confirmPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 6
+        confirmPassword:
+          type: string
+          minLength: 6
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    # Employee Schemas
+    Employee:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        department:
+          type: string
+        position:
+          type: string
+        manager:
+          type: string
+        hireDate:
+          type: string
+          format: date
+        salary:
+          type: number
+        status:
+          type: string
+          enum: [Active, Inactive, Terminated]
+
+    CreateEmployeeRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - department
+        - position
+      properties:
+        employeeId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        department:
+          type: string
+        position:
+          type: string
+        manager:
+          type: string
+        hireDate:
+          type: string
+          format: date
+        salary:
+          type: number
+
+    UpdateEmployeeRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        department:
+          type: string
+        position:
+          type: string
+        manager:
+          type: string
+        salary:
+          type: number
+
+    EmployeeListResponse:
+      type: object
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Employee'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    # Job Post Schemas
+    JobPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        department:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salary:
+          type: string
+        status:
+          type: string
+          enum: [Draft, Pending Approval, Approved, Published, Expired]
+        applicants:
+          type: integer
+        postedDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        isRemote:
+          type: boolean
+        employmentType:
+          type: string
+        createdBy:
+          type: string
+
+    CreateJobPostRequest:
+      type: object
+      required:
+        - title
+        - department
+        - description
+        - requirements
+      properties:
+        title:
+          type: string
+        department:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salary:
+          type: string
+        expiryDate:
+          type: string
+          format: date-time
+        isRemote:
+          type: boolean
+        employmentType:
+          type: string
+
+    UpdateJobPostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        department:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salary:
+          type: string
+        expiryDate:
+          type: string
+          format: date-time
+        isRemote:
+          type: boolean
+        employmentType:
+          type: string
+
+    UpdateJobPostStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [Draft, Pending Approval, Approved, Published, Expired]
+
+    JobPostListResponse:
+      type: object
+      properties:
+        jobPosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobPost'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    # Candidate Schemas
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        status:
+          type: string
+          enum: [New, Screening, Interview, Technical, Final, Offer, Hired, Rejected]
+        priority:
+          type: string
+          enum: [Low, Medium, High, Urgent]
+        rating:
+          type: number
+        source:
+          type: string
+        appliedDate:
+          type: string
+          format: date-time
+        skills:
+          type: array
+          items:
+            type: string
+
+    CandidateDetail:
+      allOf:
+        - $ref: '#/components/schemas/Candidate'
+        - type: object
+          properties:
+            experience:
+              type: integer
+            education:
+              type: string
+            location:
+              type: string
+            salary:
+              type: object
+              properties:
+                expected:
+                  type: number
+                offered:
+                  type: number
+            notes:
+              type: string
+            documents:
+              type: object
+              properties:
+                cv:
+                  type: string
+                coverLetter:
+                  type: string
+                portfolio:
+                  type: string
+                certificates:
+                  type: array
+                  items:
+                    type: string
+            interviews:
+              type: array
+              items:
+                $ref: '#/components/schemas/Interview'
+
+    CreateCandidateRequest:
+      type: object
+      required:
+        - name
+        - email
+        - position
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        source:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: integer
+        education:
+          type: string
+        location:
+          type: string
+        expectedSalary:
+          type: number
+        notes:
+          type: string
+
+    UpdateCandidateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: integer
+        education:
+          type: string
+        location:
+          type: string
+        expectedSalary:
+          type: number
+        notes:
+          type: string
+
+    UpdateCandidateStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [New, Screening, Interview, Technical, Final, Offer, Hired, Rejected]
+
+    CandidateListResponse:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    # Interview Schemas
+    Interview:
+      type: object
+      properties:
+        id:
+          type: string
+        candidateId:
+          type: string
+        candidateName:
+          type: string
+        position:
+          type: string
+        type:
+          type: string
+          enum: [Phone, Video, In-person, Technical]
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        duration:
+          type: integer
+        interviewerId:
+          type: string
+        interviewerName:
+          type: string
+        status:
+          type: string
+          enum: [Scheduled, Completed, Cancelled]
+
+    InterviewDetail:
+      allOf:
+        - $ref: '#/components/schemas/Interview'
+        - type: object
+          properties:
+            candidateEmail:
+              type: string
+              format: email
+            candidatePhone:
+              type: string
+            location:
+              type: string
+            meetingLink:
+              type: string
+            notes:
+              type: string
+            feedback:
+              $ref: '#/components/schemas/InterviewFeedback'
+
+    ScheduleInterviewRequest:
+      type: object
+      required:
+        - candidateId
+        - type
+        - date
+        - time
+        - duration
+        - interviewerId
+      properties:
+        candidateId:
+          type: string
+        type:
+          type: string
+          enum: [Phone, Video, In-person, Technical]
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        duration:
+          type: integer
+        interviewerId:
+          type: string
+        location:
+          type: string
+        meetingLink:
+          type: string
+        notes:
+          type: string
+
+    UpdateInterviewRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [Phone, Video, In-person, Technical]
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        duration:
+          type: integer
+        interviewerId:
+          type: string
+        location:
+          type: string
+        meetingLink:
+          type: string
+        notes:
+          type: string
+
+    InterviewFeedback:
+      type: object
+      required:
+        - technicalSkills
+        - communicationSkills
+        - problemSolving
+        - culturalFit
+        - overallRating
+      properties:
+        technicalSkills:
+          type: number
+          minimum: 1
+          maximum: 5
+        communicationSkills:
+          type: number
+          minimum: 1
+          maximum: 5
+        problemSolving:
+          type: number
+          minimum: 1
+          maximum: 5
+        culturalFit:
+          type: number
+          minimum: 1
+          maximum: 5
+        overallRating:
+          type: number
+          minimum: 1
+          maximum: 5
+        comments:
+          type: string
+
+    InterviewListResponse:
+      type: object
+      properties:
+        interviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interview'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    # Dashboard Schemas
+    DashboardStats:
+      type: object
+      properties:
+        totalEmployees:
+          type: integer
+        totalAttendance:
+          type: integer
+        totalVacations:
+          type: integer
+        interviewsScheduled:
+          type: integer
+        hiredCandidates:
+          type: integer
+        activeJobs:
+          type: integer
+
+    AttendanceData:
+      type: object
+      properties:
+        month:
+          type: string
+        attendance:
+          type: integer
+        permission:
+          type: integer
+        vacation:
+          type: integer
+
+    Meeting:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        duration:
+          type: string
+
+    Request:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        jobTitle:
+          type: string
+        details:
+          type: string
+
+    JobStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+
+    DepartmentHiring:
+      type: object
+      properties:
+        department:
+          type: string
+        filled:
+          type: integer
+        total:
+          type: integer
+        percentage:
+          type: number
+
+    # CV Management Schemas
+    CV:
+      type: object
+      properties:
+        id:
+          type: string
+        candidateId:
+          type: string
+        fileName:
+          type: string
+        filePath:
+          type: string
+        fileSize:
+          type: integer
+        uploadDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        parsedData:
+          type: object
+
+    CreateCVRequest:
+      type: object
+      required:
+        - candidateId
+        - fileName
+        - filePath
+      properties:
+        candidateId:
+          type: string
+        fileName:
+          type: string
+        filePath:
+          type: string
+        fileSize:
+          type: integer
+
+    UpdateCVRequest:
+      type: object
+      properties:
+        fileName:
+          type: string
+        status:
+          type: string
+        parsedData:
+          type: object
+
+    CVListResponse:
+      type: object
+      properties:
+        cvs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CV'
+        total:
+          type: integer
+
+    ParsedCVData:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: integer
+
+    # Calendar Schemas
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        attendees:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+          enum: [interview, meeting, deadline]
+        location:
+          type: string
+        meetingLink:
+          type: string
+
+    CreateCalendarEventRequest:
+      type: object
+      required:
+        - title
+        - startDate
+        - endDate
+        - type
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        attendees:
+          type: array
+          items:
+            type: string
+        type:
+          type: string
+          enum: [interview, meeting, deadline]
+        location:
+          type: string
+        meetingLink:
+          type: string
+
+    UpdateCalendarEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        attendees:
+          type: array
+          items:
+            type: string
+        location:
+          type: string
+        meetingLink:
+          type: string
+
+    # User Management Schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        department:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, locked]
+
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+        - department
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+        department:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        department:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, locked]
+
+    UserListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    Permission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        module:
+          type: string
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    # Common Schemas
+    UpdateStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

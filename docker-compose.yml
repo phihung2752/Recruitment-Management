@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # HR Management API
+  hrmanagement-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrmanagement-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=172.29.196.213;Port=3306;Database=hr_system;User ID=root;Password=275202;
+      - JwtSettings__SecretKey=ProductionSecretKeyThatIsAtLeast32CharactersLong!@#$$%^&*()
+      - JwtSettings__Issuer=HRManagementAPI
+      - JwtSettings__Audience=HRManagementClient
+      - JwtSettings__ExpiryInMinutes=60
+      - GoogleGemini__ApiKey=${GOOGLE_GEMINI_API_KEY}
+      - GoogleGemini__ApiUrl=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+    ports:
+      - "8080:8080"
+    volumes:
+      - api_uploads:/app/uploads
+      - api_logs:/app/logs
+    networks:
+      - hrmanagement-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Next.js Frontend
+  hrmanagement-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: hrmanagement-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://hrmanagement-api:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - hrmanagement-api
+    networks:
+      - hrmanagement-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: hrmanagement-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - hrmanagement-api
+      - hrmanagement-frontend
+    networks:
+      - hrmanagement-network
+
+  # Redis for Caching (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: hrmanagement-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hrmanagement-network
+    command: redis-server --appendonly yes
+
+volumes:
+  api_uploads:
+    driver: local
+  api_logs:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  hrmanagement-network:
+    driver: bridge
