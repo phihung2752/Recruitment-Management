@@ -523,6 +523,80 @@ namespace HRManagementSystem.Controllers
             }
         }
 
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            try
+            {
+                // Mock users data for now
+                var users = new List<object>
+                {
+                    new
+                    {
+                        UserId = 1,
+                        Username = "admin",
+                        Email = "admin@company.com",
+                        FirstName = "System",
+                        LastName = "Administrator",
+                        Status = "Active",
+                        RoleName = "SuperAdmin",
+                        CreatedAt = "2024-01-01T00:00:00Z"
+                    },
+                    new
+                    {
+                        UserId = 2,
+                        Username = "hr_manager",
+                        Email = "hr@company.com",
+                        FirstName = "Nguyễn Văn",
+                        LastName = "A",
+                        Status = "Active",
+                        RoleName = "HR Manager",
+                        CreatedAt = "2024-01-15T00:00:00Z"
+                    },
+                    new
+                    {
+                        UserId = 3,
+                        Username = "manager1",
+                        Email = "manager@company.com",
+                        FirstName = "Trần Thị",
+                        LastName = "B",
+                        Status = "Active",
+                        RoleName = "Manager",
+                        CreatedAt = "2024-02-01T00:00:00Z"
+                    },
+                    new
+                    {
+                        UserId = 4,
+                        Username = "employee1",
+                        Email = "employee@company.com",
+                        FirstName = "Lê Văn",
+                        LastName = "C",
+                        Status = "Pending",
+                        RoleName = "Employee",
+                        CreatedAt = "2024-02-15T00:00:00Z"
+                    },
+                    new
+                    {
+                        UserId = 5,
+                        Username = "employee2",
+                        Email = "employee2@company.com",
+                        FirstName = "Phạm Thị",
+                        LastName = "D",
+                        Status = "Inactive",
+                        RoleName = "Employee",
+                        CreatedAt = "2024-03-01T00:00:00Z"
+                    }
+                };
+
+                return Ok(new { users });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching users: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
         private async Task<int> GetCountAsync(SqlConnection connection, string query)
         {
             using var command = new SqlCommand(query, connection);
