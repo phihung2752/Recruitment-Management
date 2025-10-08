@@ -86,30 +86,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { username, email, password, firstName, lastName } = body
 
-    // TODO: Replace with real database insert
-    // const newUser = await db.query(
-    //   'INSERT INTO Users (Username, Email, Password, FirstName, LastName) VALUES (?, ?, ?, ?, ?)',
-    //   [username, email, password, firstName, lastName]
-    // )
+    // Connect to real backend API
+    const response = await fetch('http://localhost:5000/api/admin/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        firstName,
+        lastName
+      })
+    })
 
-    const newUser = {
-      UserId: mockUsers.length + 1,
-      Username: username,
-      Email: email,
-      FirstName: firstName,
-      LastName: lastName,
-      Status: 'Active',
-      RoleName: 'Employee',
-      CreatedAt: new Date().toISOString()
+    if (!response.ok) {
+      const errorData = await response.json()
+      return NextResponse.json(
+        { success: false, message: errorData.message || 'Failed to create user' },
+        { status: response.status }
+      )
     }
 
-    mockUsers.push(newUser)
-
-    return NextResponse.json({
-      success: true,
-      message: 'User created successfully',
-      user: newUser
-    })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json(

@@ -574,6 +574,102 @@ namespace HRManagementSystem.Controllers
             }
         }
 
+        [HttpPost("users")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                // Check if username or email already exists
+                var checkQuery = @"
+                    SELECT COUNT(*) FROM Users 
+                    WHERE Username = @Username OR Email = @Email";
+
+                using var checkCommand = new SqlCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@Username", request.Username);
+                checkCommand.Parameters.AddWithValue("@Email", request.Email);
+
+                var exists = (int)await checkCommand.ExecuteScalarAsync();
+                if (exists > 0)
+                {
+                    return BadRequest(new { message = "Username or email already exists" });
+                }
+
+                // Create new user
+                var userId = Guid.NewGuid().ToString();
+                var insertQuery = @"
+                    INSERT INTO Users (Id, Username, Email, PasswordHash, Salt, FirstName, LastName, IsActive, CreatedAt, UpdatedAt)
+                    VALUES (@Id, @Username, @Email, @PasswordHash, @Salt, @FirstName, @LastName, @IsActive, @CreatedAt, @UpdatedAt)";
+
+                using var insertCommand = new SqlCommand(insertQuery, connection);
+                insertCommand.Parameters.AddWithValue("@Id", userId);
+                insertCommand.Parameters.AddWithValue("@Username", request.Username);
+                insertCommand.Parameters.AddWithValue("@Email", request.Email);
+                insertCommand.Parameters.AddWithValue("@PasswordHash", BCrypt.Net.BCrypt.HashPassword(request.Password));
+                insertCommand.Parameters.AddWithValue("@Salt", "");
+                insertCommand.Parameters.AddWithValue("@FirstName", request.FirstName);
+                insertCommand.Parameters.AddWithValue("@LastName", request.LastName);
+                insertCommand.Parameters.AddWithValue("@IsActive", true);
+                insertCommand.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
+                insertCommand.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow);
+
+                await insertCommand.ExecuteNonQueryAsync();
+
+                // Get the created user
+                var getUserQuery = @"
+                    SELECT 
+                        u.Id as UserId,
+                        u.Username,
+                        u.Email,
+                        u.FirstName,
+                        u.LastName,
+                        CASE WHEN u.IsActive = 1 THEN 'Active' ELSE 'Inactive' END as Status,
+                        'Employee' as RoleName,
+                        u.CreatedAt
+                    FROM Users u
+                    WHERE u.Id = @Id";
+
+                using var getUserCommand = new SqlCommand(getUserQuery, connection);
+                getUserCommand.Parameters.AddWithValue("@Id", userId);
+                using var reader = await getUserCommand.ExecuteReaderAsync();
+
+                if (await reader.ReadAsync())
+                {
+                    var newUser = new
+                    {
+                        UserId = reader.GetString("UserId"),
+                        Username = reader.GetString("Username"),
+                        Email = reader.GetString("Email"),
+                        FirstName = reader.GetString("FirstName"),
+                        LastName = reader.GetString("LastName"),
+                        Status = reader.GetString("Status"),
+                        RoleName = reader.GetString("RoleName"),
+                        CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    };
+
+                    return Ok(new { success = true, message = "User created successfully", user = newUser });
+                }
+
+                return StatusCode(500, new { message = "Failed to retrieve created user" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        public class CreateUserRequest
+        {
+            public string Username { get; set; } = "";
+            public string Email { get; set; } = "";
+            public string Password { get; set; } = "";
+            public string FirstName { get; set; } = "";
+            public string LastName { get; set; } = "";
+        }
+
         private async Task<int> GetCountAsync(SqlConnection connection, string query)
         {
             using var command = new SqlCommand(query, connection);
