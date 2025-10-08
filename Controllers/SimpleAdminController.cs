@@ -661,6 +661,193 @@ namespace HRManagementSystem.Controllers
             }
         }
 
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    SELECT 
+                        r.Id,
+                        r.Name,
+                        r.Description,
+                        r.IsSystemRole,
+                        r.CreatedAt,
+                        COUNT(ur.UserId) as UserCount
+                    FROM Roles r
+                    LEFT JOIN UserRoles ur ON r.Id = ur.RoleId
+                    GROUP BY r.Id, r.Name, r.Description, r.IsSystemRole, r.CreatedAt
+                    ORDER BY r.CreatedAt DESC";
+
+                using var command = new SqlCommand(query, connection);
+                using var reader = await command.ExecuteReaderAsync();
+
+                var roles = new List<object>();
+                while (await reader.ReadAsync())
+                {
+                    roles.Add(new
+                    {
+                        Id = reader.GetString("Id"),
+                        Name = reader.GetString("Name"),
+                        Description = reader.IsDBNull("Description") ? "" : reader.GetString("Description"),
+                        IsSystemRole = reader.GetBoolean("IsSystemRole"),
+                        UserCount = reader.GetInt32("UserCount"),
+                        CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    });
+                }
+
+                return Ok(new { roles });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching roles: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        [HttpGet("permissions")]
+        public async Task<IActionResult> GetPermissions()
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    SELECT 
+                        p.Id,
+                        p.Name,
+                        p.Description,
+                        p.Module,
+                        p.Action,
+                        p.Resource,
+                        p.CreatedAt
+                    FROM Permissions p
+                    ORDER BY p.Module, p.Action";
+
+                using var command = new SqlCommand(query, connection);
+                using var reader = await command.ExecuteReaderAsync();
+
+                var permissions = new List<object>();
+                while (await reader.ReadAsync())
+                {
+                    permissions.Add(new
+                    {
+                        Id = reader.GetString("Id"),
+                        Name = reader.GetString("Name"),
+                        Description = reader.IsDBNull("Description") ? "" : reader.GetString("Description"),
+                        Module = reader.GetString("Module"),
+                        Action = reader.GetString("Action"),
+                        Resource = reader.GetString("Resource"),
+                        CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    });
+                }
+
+                return Ok(new { permissions });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching permissions: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        [HttpPost("users/{userId}/roles")]
+        public async Task<IActionResult> AssignUserRole(string userId, [FromBody] AssignRoleRequest request)
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                // Check if user exists
+                var userExistsQuery = "SELECT COUNT(*) FROM Users WHERE Id = @UserId";
+                using var userExistsCommand = new SqlCommand(userExistsQuery, connection);
+                userExistsCommand.Parameters.AddWithValue("@UserId", userId);
+                var userExists = (int)await userExistsCommand.ExecuteScalarAsync();
+
+                if (userExists == 0)
+                {
+                    return NotFound(new { message = "User not found" });
+                }
+
+                // Check if role exists
+                var roleExistsQuery = "SELECT COUNT(*) FROM Roles WHERE Id = @RoleId";
+                using var roleExistsCommand = new SqlCommand(roleExistsQuery, connection);
+                roleExistsCommand.Parameters.AddWithValue("@RoleId", request.RoleId);
+                var roleExists = (int)await roleExistsCommand.ExecuteScalarAsync();
+
+                if (roleExists == 0)
+                {
+                    return NotFound(new { message = "Role not found" });
+                }
+
+                // Check if assignment already exists
+                var existsQuery = "SELECT COUNT(*) FROM UserRoles WHERE UserId = @UserId AND RoleId = @RoleId";
+                using var existsCommand = new SqlCommand(existsQuery, connection);
+                existsCommand.Parameters.AddWithValue("@UserId", userId);
+                existsCommand.Parameters.AddWithValue("@RoleId", request.RoleId);
+                var alreadyExists = (int)await existsCommand.ExecuteScalarAsync();
+
+                if (alreadyExists > 0)
+                {
+                    return BadRequest(new { message = "User already has this role" });
+                }
+
+                // Assign role
+                var assignQuery = @"
+                    INSERT INTO UserRoles (UserId, RoleId, AssignedAt, AssignedById)
+                    VALUES (@UserId, @RoleId, @AssignedAt, @AssignedById)";
+
+                using var assignCommand = new SqlCommand(assignQuery, connection);
+                assignCommand.Parameters.AddWithValue("@UserId", userId);
+                assignCommand.Parameters.AddWithValue("@RoleId", request.RoleId);
+                assignCommand.Parameters.AddWithValue("@AssignedAt", DateTime.UtcNow);
+                assignCommand.Parameters.AddWithValue("@AssignedById", DBNull.Value); // TODO: Get from current user
+
+                await assignCommand.ExecuteNonQueryAsync();
+
+                return Ok(new { success = true, message = "Role assigned successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning role: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        [HttpDelete("users/{userId}/roles/{roleId}")]
+        public async Task<IActionResult> RemoveUserRole(string userId, string roleId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = "DELETE FROM UserRoles WHERE UserId = @UserId AND RoleId = @RoleId";
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.Parameters.AddWithValue("@RoleId", roleId);
+
+                var rowsAffected = await command.ExecuteNonQueryAsync();
+
+                if (rowsAffected == 0)
+                {
+                    return NotFound(new { message = "User role assignment not found" });
+                }
+
+                return Ok(new { success = true, message = "Role removed successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing role: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
         public class CreateUserRequest
         {
             public string Username { get; set; } = "";
@@ -668,6 +855,11 @@ namespace HRManagementSystem.Controllers
             public string Password { get; set; } = "";
             public string FirstName { get; set; } = "";
             public string LastName { get; set; } = "";
+        }
+
+        public class AssignRoleRequest
+        {
+            public string RoleId { get; set; } = "";
         }
 
         private async Task<int> GetCountAsync(SqlConnection connection, string query)

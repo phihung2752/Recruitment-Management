@@ -26,7 +26,8 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
-  CheckCircle
+  CheckCircle,
+  Shield
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -111,6 +112,20 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
       href: "/employees",
       icon: Users,
       permission: "employee.read",
+      group: "employees"
+    },
+    {
+      title: "User Management",
+      href: "/users",
+      icon: UserCog,
+      permission: "user.read",
+      group: "employees"
+    },
+    {
+      title: "Permissions",
+      href: "/permissions",
+      icon: Shield,
+      permission: "permission.read",
       group: "employees"
     },
     
