@@ -67,6 +67,91 @@ export default function JobPostingsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [creating, setCreating] = useState(false)
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    requirements: '',
+    location: '',
+    workType: 'Full-time',
+    employmentType: 'Permanent',
+    experienceLevel: 'Mid',
+    numberOfPositions: 1,
+    applicationDeadline: ''
+  })
+
+  // Handle form input changes
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  // Handle create job posting
+  const handleCreateJob = async () => {
+    try {
+      setCreating(true)
+      const token = localStorage.getItem('token')
+      
+      const response = await fetch('/api/job-postings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          requirements: formData.requirements,
+          location: formData.location,
+          workType: formData.workType,
+          employmentType: formData.employmentType,
+          experienceLevel: formData.experienceLevel,
+          numberOfPositions: formData.numberOfPositions,
+          applicationDeadline: formData.applicationDeadline ? new Date(formData.applicationDeadline).toISOString() : null,
+          status: 'Draft' // Start as draft, needs approval
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Job posting created:', result)
+        
+        // Reset form
+        setFormData({
+          title: '',
+          description: '',
+          requirements: '',
+          location: '',
+          workType: 'Full-time',
+          employmentType: 'Permanent',
+          experienceLevel: 'Mid',
+          numberOfPositions: 1,
+          applicationDeadline: ''
+        })
+        
+        // Close dialog
+        setShowCreateDialog(false)
+        
+        // Refresh job postings
+        window.location.reload()
+        
+        alert('Job posting created successfully! It will be reviewed before publishing.')
+      } else {
+        const error = await response.json()
+        console.error('❌ Error creating job posting:', error)
+        alert('Failed to create job posting. Please try again.')
+      }
+    } catch (error) {
+      console.error('❌ Error creating job posting:', error)
+      alert('Failed to create job posting. Please try again.')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   // Fetch real data from API
   useEffect(() => {
@@ -83,15 +168,40 @@ export default function JobPostingsPage() {
 
         if (response.ok) {
           const data = await response.json()
+          setJobs(data.jobPostings || [])
           setJobPostings(data.jobPostings || [])
+          setFilteredJobs(data.jobPostings || [])
           setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 })
+          
+          // Calculate stats
+          const jobPostings = data.jobPostings || []
+          const totalJobs = jobPostings.length
+          const activeJobs = jobPostings.filter((job: JobPosting) => job.status === 'Active').length
+          const draftJobs = jobPostings.filter((job: JobPosting) => job.status === 'Draft').length
+          const totalApplications = jobPostings.reduce((sum: number, job: JobPosting) => sum + (job.applicationsCount || 0), 0)
+          const totalViews = jobPostings.reduce((sum: number, job: JobPosting) => sum + (job.viewsCount || 0), 0)
+          const hiredCount = jobPostings.reduce((sum: number, job: JobPosting) => sum + (job.hiredCount || 0), 0)
+          const hireRate = totalApplications > 0 ? (hiredCount / totalApplications) * 100 : 0
+        
+          setStats({
+            totalJobs,
+            activeJobs,
+            draftJobs,
+            totalApplications,
+            totalViews,
+            hireRate
+          })
         } else {
           console.error('Failed to fetch job postings:', response.statusText)
+          setJobs([])
           setJobPostings([])
+          setFilteredJobs([])
         }
       } catch (error) {
         console.error('Error fetching job postings:', error)
+        setJobs([])
         setJobPostings([])
+        setFilteredJobs([])
       } finally {
         setLoading(false)
       }
@@ -100,57 +210,6 @@ export default function JobPostingsPage() {
     fetchJobPostings()
   }, [])
 
-  const loadJobPostings = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Use real data from API
-      const response = await fetch('/api/job-postings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setJobs(data.jobPostings || [])
-        setJobPostings(data.jobPostings || [])
-        setFilteredJobs(data.jobPostings || [])
-        setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 })
-        
-        // Calculate stats
-        const jobPostings = data.jobPostings || []
-        const totalJobs = jobPostings.length
-        const activeJobs = jobPostings.filter((job: JobPosting) => job.status === 'Active').length
-        const draftJobs = jobPostings.filter((job: JobPosting) => job.status === 'Draft').length
-        const totalApplications = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.applicationsCount, 0)
-        const totalViews = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.viewsCount, 0)
-        const hiredCount = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.hiredCount, 0)
-        const hireRate = totalApplications > 0 ? (hiredCount / totalApplications) * 100 : 0
-      
-        setStats({
-          totalJobs,
-          activeJobs,
-          draftJobs,
-          totalApplications,
-          totalViews,
-          hireRate
-        })
-      } else {
-        console.error('Failed to fetch job postings:', response.statusText)
-        setJobs([])
-        setJobPostings([])
-        setFilteredJobs([])
-      }
-    } catch (error) {
-      console.error('Error loading job postings:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -364,6 +423,8 @@ export default function JobPostingsPage() {
                 <Label htmlFor="title">Job Title</Label>
                 <Input
                   id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="e.g. Senior Software Engineer"
                   className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
                 />
@@ -372,6 +433,8 @@ export default function JobPostingsPage() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Describe the role and responsibilities..."
                   rows={3}
                   className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
@@ -381,6 +444,8 @@ export default function JobPostingsPage() {
                 <Label htmlFor="requirements">Requirements</Label>
                 <Textarea
                   id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => handleInputChange('requirements', e.target.value)}
                   placeholder="List the required skills and qualifications..."
                   rows={3}
                   className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
@@ -391,13 +456,15 @@ export default function JobPostingsPage() {
                   <Label htmlFor="location">Location</Label>
                   <Input
                     id="location"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
                     placeholder="e.g. Ho Chi Minh City"
                     className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
                   />
                 </div>
                 <div>
                   <Label htmlFor="workType">Work Type</Label>
-                  <Select>
+                  <Select value={formData.workType} onValueChange={(value) => handleInputChange('workType', value)}>
                     <SelectTrigger className="bg-hr-bg-secondary border-hr-border">
                       <SelectValue />
                     </SelectTrigger>
@@ -410,10 +477,68 @@ export default function JobPostingsPage() {
                   </Select>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="employmentType">Employment Type</Label>
+                  <Select value={formData.employmentType} onValueChange={(value) => handleInputChange('employmentType', value)}>
+                    <SelectTrigger className="bg-hr-bg-secondary border-hr-border">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Permanent">Permanent</SelectItem>
+                      <SelectItem value="Contract">Contract</SelectItem>
+                      <SelectItem value="Internship">Internship</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="experienceLevel">Experience Level</Label>
+                  <Select value={formData.experienceLevel} onValueChange={(value) => handleInputChange('experienceLevel', value)}>
+                    <SelectTrigger className="bg-hr-bg-secondary border-hr-border">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Entry">Entry Level</SelectItem>
+                      <SelectItem value="Mid">Mid Level</SelectItem>
+                      <SelectItem value="Senior">Senior Level</SelectItem>
+                      <SelectItem value="Lead">Lead Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="numberOfPositions">Number of Positions</Label>
+                  <Input
+                    id="numberOfPositions"
+                    type="number"
+                    min="1"
+                    value={formData.numberOfPositions}
+                    onChange={(e) => handleInputChange('numberOfPositions', parseInt(e.target.value) || 1)}
+                    className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="applicationDeadline">Application Deadline</Label>
+                  <Input
+                    id="applicationDeadline"
+                    type="date"
+                    value={formData.applicationDeadline}
+                    onChange={(e) => handleInputChange('applicationDeadline', e.target.value)}
+                    className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-              <Button className="bg-hr-primary text-white hover:bg-hr-primary/90 hover:shadow-md transition-all">Create Job Posting</Button>
+              <Button 
+                onClick={handleCreateJob}
+                disabled={creating || !formData.title || !formData.description}
+                className="bg-hr-primary text-white hover:bg-hr-primary/90 hover:shadow-md transition-all"
+              >
+                {creating ? 'Creating...' : 'Create Job Posting'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -253,6 +253,75 @@ namespace HRManagementSystem.Controllers
             }
         }
 
+        [HttpPost("{id}/approve")]
+        public async Task<IActionResult> ApproveJobPosting(string id, [FromBody] ApproveJobPostingRequest request)
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    UPDATE JobPostings 
+                    SET Status = @Status, PublishedAt = @PublishedAt, UpdatedAt = @UpdatedAt
+                    WHERE Id = @Id";
+
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", id);
+                command.Parameters.AddWithValue("@Status", request.Status);
+                command.Parameters.AddWithValue("@PublishedAt", request.PublishedAt ?? DateTime.Now);
+                command.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+
+                var rowsAffected = await command.ExecuteNonQueryAsync();
+
+                if (rowsAffected > 0)
+                {
+                    return Ok(new { id, message = "Job posting approved successfully", status = request.Status });
+                }
+
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error approving job posting: {Message}", ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("{id}/reject")]
+        public async Task<IActionResult> RejectJobPosting(string id, [FromBody] RejectJobPostingRequest request)
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    UPDATE JobPostings 
+                    SET Status = @Status, UpdatedAt = @UpdatedAt
+                    WHERE Id = @Id";
+
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", id);
+                command.Parameters.AddWithValue("@Status", request.Status);
+                command.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+
+                var rowsAffected = await command.ExecuteNonQueryAsync();
+
+                if (rowsAffected > 0)
+                {
+                    return Ok(new { id, message = "Job posting rejected successfully", status = request.Status });
+                }
+
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting job posting: {Message}", ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         private async Task<int> GetCountAsync(SqlConnection connection, string query)
         {
             using var command = new SqlCommand(query, connection);
@@ -289,5 +358,18 @@ namespace HRManagementSystem.Controllers
         public DateTime? PublishedAt { get; set; }
         public DateTime? ApplicationDeadline { get; set; }
         public int NumberOfPositions { get; set; }
+    }
+
+    public class ApproveJobPostingRequest
+    {
+        public string Status { get; set; } = "Active";
+        public DateTime? PublishedAt { get; set; }
+        public string? ReviewComment { get; set; }
+    }
+
+    public class RejectJobPostingRequest
+    {
+        public string Status { get; set; } = "Rejected";
+        public string? ReviewComment { get; set; }
     }
 }

@@ -25,7 +25,8 @@ import {
   HelpCircle,
   Search,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  CheckCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -66,6 +67,13 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
       href: "/job-postings",
       icon: Briefcase,
       permission: "job.read",
+      group: "recruitment"
+    },
+    {
+      title: "Job Approvals",
+      href: "/job-approvals",
+      icon: CheckCircle,
+      permission: "job.approve",
       group: "recruitment"
     },
     {
