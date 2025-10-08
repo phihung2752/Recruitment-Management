@@ -528,65 +528,42 @@ namespace HRManagementSystem.Controllers
         {
             try
             {
-                // Mock users data for now
-                var users = new List<object>
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    SELECT 
+                        u.Id as UserId,
+                        u.Username,
+                        u.Email,
+                        u.FirstName,
+                        u.LastName,
+                        CASE WHEN u.IsActive = 1 THEN 'Active' ELSE 'Inactive' END as Status,
+                        COALESCE(r.Name, 'Employee') as RoleName,
+                        u.CreatedAt
+                    FROM Users u
+                    LEFT JOIN UserRoles ur ON u.Id = ur.UserId
+                    LEFT JOIN Roles r ON ur.RoleId = r.Id
+                    ORDER BY u.CreatedAt DESC";
+
+                using var command = new SqlCommand(query, connection);
+                using var reader = await command.ExecuteReaderAsync();
+
+                var users = new List<object>();
+                while (await reader.ReadAsync())
                 {
-                    new
+                    users.Add(new
                     {
-                        UserId = 1,
-                        Username = "admin",
-                        Email = "admin@company.com",
-                        FirstName = "System",
-                        LastName = "Administrator",
-                        Status = "Active",
-                        RoleName = "SuperAdmin",
-                        CreatedAt = "2024-01-01T00:00:00Z"
-                    },
-                    new
-                    {
-                        UserId = 2,
-                        Username = "hr_manager",
-                        Email = "hr@company.com",
-                        FirstName = "Nguyễn Văn",
-                        LastName = "A",
-                        Status = "Active",
-                        RoleName = "HR Manager",
-                        CreatedAt = "2024-01-15T00:00:00Z"
-                    },
-                    new
-                    {
-                        UserId = 3,
-                        Username = "manager1",
-                        Email = "manager@company.com",
-                        FirstName = "Trần Thị",
-                        LastName = "B",
-                        Status = "Active",
-                        RoleName = "Manager",
-                        CreatedAt = "2024-02-01T00:00:00Z"
-                    },
-                    new
-                    {
-                        UserId = 4,
-                        Username = "employee1",
-                        Email = "employee@company.com",
-                        FirstName = "Lê Văn",
-                        LastName = "C",
-                        Status = "Pending",
-                        RoleName = "Employee",
-                        CreatedAt = "2024-02-15T00:00:00Z"
-                    },
-                    new
-                    {
-                        UserId = 5,
-                        Username = "employee2",
-                        Email = "employee2@company.com",
-                        FirstName = "Phạm Thị",
-                        LastName = "D",
-                        Status = "Inactive",
-                        RoleName = "Employee",
-                        CreatedAt = "2024-03-01T00:00:00Z"
-                    }
-                };
+                        UserId = reader.GetString("UserId"),
+                        Username = reader.GetString("Username"),
+                        Email = reader.GetString("Email"),
+                        FirstName = reader.GetString("FirstName"),
+                        LastName = reader.GetString("LastName"),
+                        Status = reader.GetString("Status"),
+                        RoleName = reader.IsDBNull("RoleName") ? "Employee" : reader.GetString("RoleName"),
+                        CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    });
+                }
 
                 return Ok(new { users });
             }
