@@ -1,37 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Shield, Database, Users, Settings } from "lucide-react"
 
 export default function HomePage() {
-  const [authenticated, setAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const auth = localStorage.getItem('authenticated')
-    setAuthenticated(!!auth)
-    setLoading(false)
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tải...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (authenticated) {
-    router.push('/dashboard-sqlserver')
-    return null
-  }
+    // Redirect to login page immediately
+    router.push('/login')
+  }, [router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

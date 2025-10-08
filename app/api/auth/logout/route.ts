@@ -1,6 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST() {
-  // This is a mock implementation. In a real application, you would invalidate the session on your backend.
-  return NextResponse.json({ success: true })
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
+  try {
+    // Mock logout
+    return NextResponse.json({ message: 'Logged out successfully' })
+
+  } catch (error) {
+    console.error('Error logging out:', error)
+    return NextResponse.json(
+      { error: 'Failed to logout' },
+      { status: 500 }
+    )
+  }
 }

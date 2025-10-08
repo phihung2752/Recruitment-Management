@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,15 +26,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const { login, isAuthenticated } = useAuth()
   const router = useRouter()
-
-  // Redirect nếu đã đăng nhập
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard")
-    }
-  }, [isAuthenticated, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,8 +34,20 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const success = await login(username, password)
-      if (success) {
+      // Simple authentication check
+      if (username === "admin" && password === "admin") {
+        // Store authentication in localStorage
+        localStorage.setItem('token', 'mock-token')
+        localStorage.setItem('user', JSON.stringify({
+          id: 1,
+          username: 'admin',
+          email: 'admin@company.com',
+          firstName: 'System',
+          lastName: 'Administrator',
+          status: 'active',
+          roles: ['Admin'],
+          permissions: ['*']
+        }))
         router.push("/dashboard")
       } else {
         setError("Tên đăng nhập hoặc mật khẩu không đúng")

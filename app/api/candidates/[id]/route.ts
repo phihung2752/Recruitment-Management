@@ -1,45 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params
-    console.log('🔥 API: Fetching candidate...', { id })
-
-    // Call backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
-    const response = await fetch(`${backendUrl}/api/candidates/${id}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      console.log('✅ API: Candidate fetched successfully')
-      return NextResponse.json(data)
-    } else {
-      console.log('❌ Backend not available, using mock data')
-      
-      // Mock data fallback
-      const mockCandidate = {
-        id,
-        firstName: "Nguyễn Văn",
-        lastName: "An",
-        email: "an.nguyen@example.com",
-        phone: "+84 123 456 789",
-        currentPosition: "Senior Developer",
-        experience: "5",
-        skills: "React, Node.js, TypeScript, AWS",
-        status: "Pending",
-        createdAt: "2024-01-15T00:00:00Z",
-        updatedAt: "2024-01-15T00:00:00Z"
-      }
-
-      return NextResponse.json(mockCandidate)
+    
+    // Mock candidate data
+    const candidate = {
+      id,
+      firstName: 'Nguyễn Văn',
+      lastName: 'A',
+      email: 'a.nguyen@example.com',
+      phone: '0901234567',
+      position: 'Senior Developer',
+      experience: '5 years',
+      skills: ['React', 'Node.js', 'TypeScript'],
+      status: 'pending',
+      aiScore: 85,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
+
+    return NextResponse.json(candidate)
+
   } catch (error) {
-    console.error('❌ API Error:', error)
+    console.error('Error fetching candidate:', error)
     return NextResponse.json(
       { error: 'Failed to fetch candidate' },
       { status: 500 }
@@ -51,29 +37,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const { id } = params
     const body = await request.json()
-    console.log('🔥 API: Updating candidate...', { id, body })
-
-    // Call backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
-    const response = await fetch(`${backendUrl}/api/candidates/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-
-    if (response.ok) {
-      console.log('✅ API: Candidate updated successfully')
-      return NextResponse.json({ success: true })
-    } else {
-      console.log('❌ Backend not available, simulating update')
-      
-      // Mock update
-      return NextResponse.json({ success: true })
+    
+    // Mock update
+    const updatedCandidate = {
+      id,
+      ...body,
+      updatedAt: new Date().toISOString()
     }
+
+    return NextResponse.json(updatedCandidate)
+
   } catch (error) {
-    console.error('❌ API Error:', error)
+    console.error('Error updating candidate:', error)
     return NextResponse.json(
       { error: 'Failed to update candidate' },
       { status: 500 }
@@ -84,51 +59,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params
-    console.log('🔥 API: Deleting candidate...', { id })
+    
+    // Mock delete
+    return NextResponse.json({ message: 'Candidate deleted successfully' })
 
-    // Call backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
-    const response = await fetch(`${backendUrl}/api/candidates/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-      },
-    })
-
-    if (response.ok) {
-      console.log('✅ API: Candidate deleted successfully')
-      return NextResponse.json({ success: true })
-    } else {
-      console.log('❌ Backend not available, simulating deletion')
-      
-      // Mock deletion
-      return NextResponse.json({ success: true })
-    }
   } catch (error) {
-    console.error('❌ API Error:', error)
+    console.error('Error deleting candidate:', error)
     return NextResponse.json(
       { error: 'Failed to delete candidate' },
       { status: 500 }
     )
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

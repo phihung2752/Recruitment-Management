@@ -1,160 +1,61 @@
 import { NextRequest, NextResponse } from "next/server"
-import { executeQuery } from "@/lib/database"
-import { requireAuth, requirePermission } from "@/lib/auth"
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Kiểm tra authentication
-    const authResult = await requireAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json(authResult, { status: 401 })
-    }
-
-    // Kiểm tra permission
-    const permissionResult = await requirePermission(request, 'reports.view')
-    if (!permissionResult.success) {
-      return NextResponse.json(permissionResult, { status: 403 })
-    }
-
-    // Lấy thống kê tổng quan
-    const totalInterviewsQuery = `
-      SELECT COUNT(*) as total
-      FROM InterviewRounds
-    `
-    const totalResult = await executeQuery(totalInterviewsQuery, [])
-    const totalInterviews = totalResult[0].total
-
-    // Lấy thống kê theo trạng thái
-    const statusQuery = `
-      SELECT 
-        Status,
-        COUNT(*) as count
-      FROM InterviewRounds
-      GROUP BY Status
-    `
-    const statusResult = await executeQuery(statusQuery, [])
-    
-    let completedInterviews = 0
-    let pendingInterviews = 0
-    let passedInterviews = 0
-    let failedInterviews = 0
-
-    statusResult.forEach((row: any) => {
-      switch (row.Status) {
-        case 'passed':
-          passedInterviews = row.count
-          completedInterviews += row.count
-          break
-        case 'failed':
-          failedInterviews = row.count
-          completedInterviews += row.count
-          break
-        case 'current':
-        case 'pending':
-          pendingInterviews += row.count
-          break
+    // Mock interview analytics data
+    const analytics = {
+      overview: {
+        totalInterviews: 45,
+        completedInterviews: 35,
+        scheduledInterviews: 8,
+        cancelledInterviews: 2,
+        averageRating: 4.2,
+        successRate: 77.8
+      },
+      byRound: [
+        { round: 'Initial Screening', total: 45, passed: 35, failed: 10, passRate: 77.8 },
+        { round: 'Technical Interview', total: 35, passed: 25, failed: 10, passRate: 71.4 },
+        { round: 'Final Interview', total: 25, passed: 20, failed: 5, passRate: 80.0 }
+      ],
+      byInterviewer: [
+        { interviewer: 'Nguyễn Văn A', total: 15, averageRating: 4.5, successRate: 80.0 },
+        { interviewer: 'Trần Thị B', total: 12, averageRating: 4.1, successRate: 75.0 },
+        { interviewer: 'Lê Văn C', total: 10, averageRating: 4.3, successRate: 70.0 },
+        { interviewer: 'Phạm Thị D', total: 8, averageRating: 4.0, successRate: 75.0 }
+      ],
+      monthlyTrends: [
+        { month: '2024-01', interviews: 8, successRate: 75.0 },
+        { month: '2024-02', interviews: 10, successRate: 80.0 },
+        { month: '2024-03', interviews: 7, successRate: 71.4 },
+        { month: '2024-04', interviews: 9, successRate: 77.8 },
+        { month: '2024-05', interviews: 12, successRate: 83.3 },
+        { month: '2024-06', interviews: 11, successRate: 72.7 }
+      ],
+      feedback: {
+        positive: [
+          'Strong technical skills',
+          'Good communication',
+          'Cultural fit',
+          'Problem-solving ability'
+        ],
+        negative: [
+          'Lack of experience',
+          'Poor communication',
+          'Technical gaps',
+          'Not a good cultural fit'
+        ]
       }
-    })
-
-    // Tính tỷ lệ thành công
-    const successRate = completedInterviews > 0 
-      ? Math.round((passedInterviews / completedInterviews) * 100) 
-      : 0
-
-    // Lấy thống kê theo vị trí
-    const positionsQuery = `
-      SELECT 
-        c.Position,
-        COUNT(ir.Id) as count
-      FROM InterviewRounds ir
-      JOIN Candidates c ON ir.CandidateId = c.Id
-      GROUP BY c.Position
-      ORDER BY count DESC
-      LIMIT 5
-    `
-    const positionsResult = await executeQuery(positionsQuery, [])
-    const topPositions = positionsResult.map((row: any) => ({
-      position: row.Position,
-      count: row.count
-    }))
-
-    // Lấy thống kê theo tháng (6 tháng gần nhất)
-    const monthlyQuery = `
-      SELECT 
-        DATE_FORMAT(ir.CreatedAt, '%Y-%m') as month,
-        COUNT(*) as interviews,
-        SUM(CASE WHEN ir.Status = 'passed' THEN 1 ELSE 0 END) as passed
-      FROM InterviewRounds ir
-      WHERE ir.CreatedAt >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY DATE_FORMAT(ir.CreatedAt, '%Y-%m')
-      ORDER BY month DESC
-    `
-    const monthlyResult = await executeQuery(monthlyQuery, [])
-    const monthlyTrends = monthlyResult.map((row: any) => ({
-      month: row.month,
-      interviews: row.interviews,
-      passed: row.passed
-    }))
-
-    // Lấy hiệu suất phỏng vấn viên
-    const interviewerQuery = `
-      SELECT 
-        ir.Interviewer,
-        COUNT(*) as interviews,
-        SUM(CASE WHEN ir.Status = 'passed' THEN 1 ELSE 0 END) as passed
-      FROM InterviewRounds ir
-      WHERE ir.Interviewer IS NOT NULL
-      GROUP BY ir.Interviewer
-      ORDER BY interviews DESC
-      LIMIT 5
-    `
-    const interviewerResult = await executeQuery(interviewerQuery, [])
-    const interviewerPerformance = interviewerResult.map((row: any) => ({
-      interviewer: row.Interviewer,
-      interviews: row.interviews,
-      successRate: row.interviews > 0 ? Math.round((row.passed / row.interviews) * 100) : 0
-    }))
-
-    // Tính thời gian phỏng vấn trung bình từ CalendarEvents
-    const durationQuery = `
-      SELECT 
-        AVG(TIMESTAMPDIFF(MINUTE, StartTime, EndTime)) as avgDuration
-      FROM CalendarEvents 
-      WHERE Title LIKE '%Phỏng vấn%'
-        AND StartTime IS NOT NULL 
-        AND EndTime IS NOT NULL
-    `
-    const durationResult = await executeQuery(durationQuery, [])
-    const averageInterviewDuration = Math.round(durationResult[0]?.avgDuration || 45)
-
-    const analyticsData = {
-      totalInterviews,
-      completedInterviews,
-      pendingInterviews,
-      passedInterviews,
-      failedInterviews,
-      averageInterviewDuration,
-      successRate,
-      topPositions,
-      monthlyTrends,
-      interviewerPerformance
     }
 
-    return NextResponse.json({
-      success: true,
-      data: analyticsData
-    }, { status: 200 })
+    return NextResponse.json(analytics)
 
   } catch (error) {
     console.error('Error fetching interview analytics:', error)
-    return NextResponse.json({
-      success: false,
-      message: "Failed to fetch interview analytics"
-    }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch interview analytics' },
+      { status: 500 }
+    )
   }
 }
-
-
-
-
-

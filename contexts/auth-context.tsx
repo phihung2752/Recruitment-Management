@@ -36,6 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      // Check if we're on the client side
+      if (typeof window === 'undefined') {
+        setLoading(false)
+        return
+      }
+      
       const token = localStorage.getItem('token')
       if (!token) {
         setLoading(false)
@@ -75,7 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json()
 
       if (data.success) {
-        localStorage.setItem('token', data.token)
+        // Check if we're on the client side before accessing localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', data.token)
+        }
         setUser(data.user)
         return true
       } else {
@@ -88,7 +97,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
-    localStorage.removeItem('token')
+    // Check if we're on the client side before accessing localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token')
+    }
     setUser(null)
   }
 

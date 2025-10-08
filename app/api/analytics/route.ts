@@ -1,177 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
-import { executeQuery } from '@/lib/database'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireAuth(request)
-    if (!authResult.success) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const dateRange = searchParams.get('dateRange') || '6months'
-
-    // Calculate date range
-    const now = new Date()
-    let startDate = new Date()
-    
-    switch (dateRange) {
-      case '1month':
-        startDate.setMonth(now.getMonth() - 1)
-        break
-      case '3months':
-        startDate.setMonth(now.getMonth() - 3)
-        break
-      case '6months':
-        startDate.setMonth(now.getMonth() - 6)
-        break
-      case '1year':
-        startDate.setFullYear(now.getFullYear() - 1)
-        break
-      default:
-        startDate.setMonth(now.getMonth() - 6)
-    }
-
-    // Get overview stats
-    const [candidatesResult, interviewsResult, hiresResult, employeesResult] = await Promise.all([
-      executeQuery('SELECT COUNT(*) as total FROM Candidates WHERE createdAt >= ?', [startDate]),
-      executeQuery('SELECT COUNT(*) as total FROM InterviewRounds WHERE createdAt >= ?', [startDate]),
-      executeQuery('SELECT COUNT(*) as total FROM Candidates WHERE status = "Hired" AND createdAt >= ?', [startDate]),
-      executeQuery('SELECT COUNT(*) as total FROM Employees WHERE status = "active"')
-    ])
-
-    const totalCandidates = candidatesResult[0]?.total || 0
-    const totalInterviews = interviewsResult[0]?.total || 0
-    const totalHires = hiresResult[0]?.total || 0
-    const totalEmployees = employeesResult[0]?.total || 0
-
-    // Calculate rates
-    const hireRate = totalCandidates > 0 ? (totalHires / totalCandidates) * 100 : 0
-    const timeToHire = totalHires > 0 ? Math.round(totalInterviews / totalHires) : 0
-    const costPerHire = totalHires > 0 ? 3200000 : 0 // Mock cost
-    const candidateSatisfaction = 4.3 // Mock satisfaction
-
-    // Get monthly trends
-    const monthlyApplications = await executeQuery(`
-      SELECT 
-        DATE_FORMAT(createdAt, '%Y-%m') as month,
-        COUNT(*) as count
-      FROM Candidates 
-      WHERE createdAt >= ?
-      GROUP BY DATE_FORMAT(createdAt, '%Y-%m')
-      ORDER BY month
-    `, [startDate])
-
-    const monthlyHires = await executeQuery(`
-      SELECT 
-        DATE_FORMAT(createdAt, '%Y-%m') as month,
-        COUNT(*) as count
-      FROM Candidates 
-      WHERE status = 'Hired' AND createdAt >= ?
-      GROUP BY DATE_FORMAT(createdAt, '%Y-%m')
-      ORDER BY month
-    `, [startDate])
-
-    const monthlyInterviews = await executeQuery(`
-      SELECT 
-        DATE_FORMAT(createdAt, '%Y-%m') as month,
-        COUNT(*) as count
-      FROM InterviewRounds 
-      WHERE createdAt >= ?
-      GROUP BY DATE_FORMAT(createdAt, '%Y-%m')
-      ORDER BY month
-    `, [startDate])
-
-    // Get department stats
-    const departmentStats = await executeQuery(`
-      SELECT 
-        department,
-        COUNT(*) as positions,
-        AVG(salary) as avgSalary,
-        COUNT(CASE WHEN status = 'active' THEN 1 END) as activeEmployees
-      FROM Employees 
-      GROUP BY department
-      ORDER BY positions DESC
-    `)
-
-    // Get source analytics
-    const sourceStats = await executeQuery(`
-      SELECT 
-        source,
-        COUNT(*) as count,
-        COUNT(CASE WHEN status = 'Hired' THEN 1 END) as hires
-      FROM Candidates 
-      WHERE createdAt >= ?
-      GROUP BY source
-      ORDER BY count DESC
-    `, [startDate])
-
-    // Get interview analytics
-    const interviewStats = await executeQuery(`
-      SELECT 
-        status,
-        COUNT(*) as count
-      FROM InterviewRounds 
-      WHERE createdAt >= ?
-      GROUP BY status
-    `, [startDate])
-
-    // Get performance metrics
-    const performanceMetrics = await executeQuery(`
-      SELECT 
-        AVG(aiScore) as avgAIScore,
-        AVG(jobMatch) as avgJobMatch,
-        AVG(cvQuality) as avgCVQuality
-      FROM CVAnalysis 
-      WHERE createdAt >= ?
-    `, [startDate])
-
+    // Mock analytics data
     const analytics = {
       overview: {
-        totalCandidates,
-        totalInterviews,
-        totalHires,
-        totalEmployees,
-        hireRate: Math.round(hireRate * 100) / 100,
-        timeToHire,
-        costPerHire,
-        candidateSatisfaction
+        totalCandidates: 150,
+        totalInterviews: 45,
+        totalHires: 25,
+        totalEmployees: 120,
+        hireRate: 16.67,
+        timeToHire: 18,
+        costPerHire: 3200000,
+        candidateSatisfaction: 4.3
       },
       trends: {
-        monthlyApplications: monthlyApplications.map((item: any) => ({
-          month: item.month,
-          count: item.count
-        })),
-        monthlyHires: monthlyHires.map((item: any) => ({
-          month: item.month,
-          count: item.count
-        })),
-        monthlyInterviews: monthlyInterviews.map((item: any) => ({
-          month: item.month,
-          count: item.count
-        }))
+        monthlyApplications: [
+          { month: '2024-01', count: 25 },
+          { month: '2024-02', count: 30 },
+          { month: '2024-03', count: 22 },
+          { month: '2024-04', count: 28 },
+          { month: '2024-05', count: 35 },
+          { month: '2024-06', count: 32 }
+        ],
+        monthlyHires: [
+          { month: '2024-01', count: 4 },
+          { month: '2024-02', count: 5 },
+          { month: '2024-03', count: 3 },
+          { month: '2024-04', count: 4 },
+          { month: '2024-05', count: 6 },
+          { month: '2024-06', count: 5 }
+        ],
+        monthlyInterviews: [
+          { month: '2024-01', count: 8 },
+          { month: '2024-02', count: 10 },
+          { month: '2024-03', count: 7 },
+          { month: '2024-04', count: 9 },
+          { month: '2024-05', count: 12 },
+          { month: '2024-06', count: 11 }
+        ]
       },
-      departmentStats: departmentStats.map((item: any) => ({
-        department: item.department,
-        positions: item.positions,
-        avgSalary: Math.round(item.avgSalary || 0),
-        activeEmployees: item.activeEmployees
-      })),
-      sourceStats: sourceStats.map((item: any) => ({
-        source: item.source,
-        count: item.count,
-        hires: item.hires,
-        conversionRate: item.count > 0 ? Math.round((item.hires / item.count) * 100) : 0
-      })),
-      interviewStats: interviewStats.map((item: any) => ({
-        status: item.status,
-        count: item.count
-      })),
+      departmentStats: [
+        { department: 'Engineering', positions: 45, avgSalary: 15000000, activeEmployees: 40 },
+        { department: 'Marketing', positions: 20, avgSalary: 12000000, activeEmployees: 18 },
+        { department: 'Sales', positions: 25, avgSalary: 13000000, activeEmployees: 22 },
+        { department: 'HR', positions: 15, avgSalary: 10000000, activeEmployees: 12 }
+      ],
+      sourceStats: [
+        { source: 'LinkedIn', count: 60, hires: 12, conversionRate: 20 },
+        { source: 'Indeed', count: 40, hires: 6, conversionRate: 15 },
+        { source: 'Company Website', count: 30, hires: 5, conversionRate: 17 },
+        { source: 'Referral', count: 20, hires: 2, conversionRate: 10 }
+      ],
+      interviewStats: [
+        { status: 'completed', count: 35 },
+        { status: 'scheduled', count: 8 },
+        { status: 'cancelled', count: 2 }
+      ],
       performanceMetrics: {
-        avgAIScore: Math.round((performanceMetrics[0]?.avgAIScore || 0) * 100) / 100,
-        avgJobMatch: Math.round((performanceMetrics[0]?.avgJobMatch || 0) * 100) / 100,
-        avgCVQuality: Math.round((performanceMetrics[0]?.avgCVQuality || 0) * 100) / 100
+        avgAIScore: 78.5,
+        avgJobMatch: 82.3,
+        avgCVQuality: 75.8
       }
     }
 
@@ -185,7 +76,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
-
-
-

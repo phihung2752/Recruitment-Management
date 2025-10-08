@@ -81,11 +81,7 @@ const nextConfig = {
   // Configure redirects
   async redirects() {
     return [
-      {
-        source: "/",
-        destination: "/dashboard",
-        permanent: false,
-      },
+      // Removed conflicting redirect - let the app handle routing
     ]
   },
 }
