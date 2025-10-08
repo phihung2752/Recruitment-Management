@@ -1,295 +1,338 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState } from 'react'
 import { 
   Upload, 
-  Link, 
   Mail, 
-  Code, 
+  Globe, 
+  FileText, 
   CheckCircle, 
-  AlertCircle, 
-  Download,
-  ExternalLink,
+  AlertCircle,
+  RefreshCw,
   Copy,
-  RefreshCw
-} from "lucide-react"
+  ExternalLink
+} from 'lucide-react'
+
+interface ImportMethod {
+  id: string
+  name: string
+  icon: React.ReactNode
+  status: 'connected' | 'not-connected' | 'error'
+  description: string
+  stats?: string
+  lastSync?: string
+}
+
+const importMethods: ImportMethod[] = [
+  {
+    id: 'vietnamworks',
+    name: 'VietnamWorks',
+    icon: <Globe className="w-5 h-5" />,
+    status: 'connected',
+    description: 'Kết nối với VietnamWorks để tự động import CV',
+    stats: '156 CVs imported this month',
+    lastSync: '2 hours ago'
+  },
+  {
+    id: 'topcv',
+    name: 'TopCV',
+    icon: <Globe className="w-5 h-5" />,
+    status: 'not-connected',
+    description: 'Kết nối với TopCV để tự động import CV'
+  },
+  {
+    id: 'indeed',
+    name: 'Indeed',
+    icon: <Globe className="w-5 h-5" />,
+    status: 'connected',
+    description: 'Kết nối với Indeed để tự động import CV',
+    stats: '89 CVs imported this month',
+    lastSync: '1 hour ago'
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    icon: <Globe className="w-5 h-5" />,
+    status: 'not-connected',
+    description: 'Kết nối với LinkedIn để tự động import CV'
+  },
+  {
+    id: 'careerlink',
+    name: 'CareerLink',
+    icon: <Globe className="w-5 h-5" />,
+    status: 'connected',
+    description: 'Kết nối với CareerLink để tự động import CV',
+    stats: '45 CVs imported this month',
+    lastSync: '3 hours ago'
+  }
+]
 
 export default function ImportCVSection() {
-  const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
-  const [embedCode, setEmbedCode] = useState("")
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [emailConfig, setEmailConfig] = useState('recruitment@company.com')
+  const [embedCode] = useState('<iframe src="https://yourcompany.com/apply"></iframe>')
 
-  const handleFileUpload = async (files: FileList) => {
-    setIsUploading(true)
-    setUploadProgress(0)
+  const handleFileUpload = (files: FileList | null) => {
+    if (!files) return
     
-    // Simulate upload progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 100))
-      setUploadProgress(i)
-    }
-    
-    setIsUploading(false)
-    console.log('Files uploaded:', files)
+    const newFiles = Array.from(files)
+    setUploadedFiles(prev => [...prev, ...newFiles])
   }
 
-  const generateEmbedCode = () => {
-    const code = `<iframe 
-  src="https://hr-system.com/cv-upload" 
-  width="100%" 
-  height="400" 
-  frameborder="0"
-  title="CV Upload Form">
-</iframe>`
-    setEmbedCode(code)
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    handleFileUpload(e.dataTransfer.files)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const copyEmbedCode = () => {
     navigator.clipboard.writeText(embedCode)
+    // Show toast notification
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'connected': return 'text-green-600 bg-green-100'
+      case 'not-connected': return 'text-gray-600 bg-gray-100'
+      case 'error': return 'text-red-600 bg-red-100'
+      default: return 'text-gray-600 bg-gray-100'
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'connected': return 'Connected'
+      case 'not-connected': return 'Not Connected'
+      case 'error': return 'Error'
+      default: return 'Unknown'
+    }
   }
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="upload" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-hr-bg-secondary border-hr-border">
-          <TabsTrigger value="upload" className="text-hr-text-primary">Upload Files</TabsTrigger>
-          <TabsTrigger value="email" className="text-hr-text-primary">Email Import</TabsTrigger>
-          <TabsTrigger value="portals" className="text-hr-text-primary">Job Portals</TabsTrigger>
-          <TabsTrigger value="embed" className="text-hr-text-primary">Embed Code</TabsTrigger>
-        </TabsList>
-
-        {/* Upload Files Tab */}
-        <TabsContent value="upload" className="space-y-4">
-          <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary">Upload CV Files</CardTitle>
-              <CardDescription className="text-hr-text-secondary">
-                Drag and drop CV files or click to browse
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="border-2 border-dashed border-hr-border rounded-lg p-8 text-center">
-                <Upload className="h-12 w-12 text-hr-text-secondary mx-auto mb-4" />
-                <div className="space-y-2">
-                  <p className="text-hr-text-primary font-medium">
-                    Drop CV files here or click to browse
-                  </p>
-                  <p className="text-sm text-hr-text-secondary">
-                    Supports PDF, DOC, DOCX files up to 20MB each
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx"
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <Button 
-                  asChild 
-                  className="mt-4 bg-hr-primary text-white hover:bg-hr-primary/90"
-                >
-                  <label htmlFor="file-upload">
-                    Choose Files
-                  </label>
-                </Button>
-              </div>
-              
-              {isUploading && (
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-hr-text-primary">Uploading...</span>
-                    <span className="text-sm text-hr-text-secondary">{uploadProgress}%</span>
+      <div className="bg-hr-bg-secondary rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-hr-text-primary mb-4">
+          Import CV từ các nguồn
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Job Portals Integration */}
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe className="w-5 h-5 text-hr-accent" />
+              <h3 className="font-medium text-hr-text-primary">Kết nối trang tuyển dụng</h3>
+            </div>
+            
+            <div className="space-y-2">
+              {importMethods.map((method) => (
+                <div key={method.id} className="flex items-center justify-between p-2 bg-hr-bg-secondary rounded">
+                  <div className="flex items-center gap-2">
+                    {method.icon}
+                    <span className="text-sm text-hr-text-primary">{method.name}</span>
                   </div>
-                  <Progress value={uploadProgress} className="h-2" />
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(method.status)}`}>
+                      {getStatusText(method.status)}
+                    </span>
+                    <button className="text-hr-accent hover:text-hr-accent-dark text-sm">
+                      {method.status === 'connected' ? 'Configure' : 'Connect'}
+                    </button>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              ))}
+            </div>
+            
+            <button className="w-full mt-4 px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark transition-colors flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Sync All CVs Now
+            </button>
+            
+            <p className="text-xs text-hr-text-muted mt-2 text-center">
+              Last sync: 2 hours ago
+            </p>
+          </div>
 
-        {/* Email Import Tab */}
-        <TabsContent value="email" className="space-y-4">
-          <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary">Email Import Configuration</CardTitle>
-              <CardDescription className="text-hr-text-secondary">
-                Set up automatic CV import from email attachments
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="email-address" className="text-hr-text-primary">Email Address</Label>
-                  <Input
-                    id="email-address"
-                    value="recruitment@company.com"
-                    readOnly
-                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="check-frequency" className="text-hr-text-primary">Check Frequency</Label>
-                  <Input
-                    id="check-frequency"
-                    value="Every 4 hours"
-                    readOnly
-                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
-                  />
-                </div>
-              </div>
-              
+          {/* Email Integration */}
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Mail className="w-5 h-5 text-hr-accent" />
+              <h3 className="font-medium text-hr-text-primary">Import từ Email</h3>
+            </div>
+            
+            <p className="text-sm text-hr-text-muted mb-3">
+              Tự động lấy CV từ email recruitment@company.com
+            </p>
+            
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-hr-text-primary">
-                  Email import is active and monitoring for new CVs
+                <input
+                  type="email"
+                  value={emailConfig}
+                  onChange={(e) => setEmailConfig(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-hr-border rounded text-sm"
+                />
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  Active
                 </span>
               </div>
               
-              <div className="bg-hr-bg-primary border border-hr-border rounded-lg p-4">
-                <h4 className="font-medium text-hr-text-primary mb-2">Import Statistics</h4>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-2xl font-bold text-hr-text-primary">24</p>
-                    <p className="text-sm text-hr-text-secondary">CVs this month</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-hr-text-primary">156</p>
-                    <p className="text-sm text-hr-text-secondary">Total imported</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-hr-text-primary">98%</p>
-                    <p className="text-sm text-hr-text-secondary">Success rate</p>
-                  </div>
-                </div>
+              <div className="text-sm text-hr-text-muted">
+                📥 156 CVs imported this month
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+            
+            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors text-sm">
+              Configure Email Rules
+            </button>
+          </div>
 
-        {/* Job Portals Tab */}
-        <TabsContent value="portals" className="space-y-4">
-          <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary">Job Portal Integrations</CardTitle>
-              <CardDescription className="text-hr-text-secondary">
-                Connect with popular job portals to import CVs automatically
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { name: "VietnamWorks", status: "Connected", lastSync: "2 hours ago" },
-                  { name: "TopCV", status: "Connected", lastSync: "1 hour ago" },
-                  { name: "CareerLink", status: "Disconnected", lastSync: "Never" },
-                  { name: "Indeed", status: "Connected", lastSync: "30 minutes ago" },
-                  { name: "LinkedIn", status: "Disconnected", lastSync: "Never" }
-                ].map((portal, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border border-hr-border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-hr-bg-primary border border-hr-border rounded-lg flex items-center justify-center">
-                        <ExternalLink className="h-5 w-5 text-hr-text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-hr-text-primary">{portal.name}</p>
-                        <p className="text-sm text-hr-text-secondary">
-                          Last sync: {portal.lastSync}
-                        </p>
-                      </div>
-                    </div>
+          {/* Upload Files */}
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Upload className="w-5 h-5 text-hr-accent" />
+              <h3 className="font-medium text-hr-text-primary">Upload CV thủ công</h3>
+            </div>
+            
+            <div
+              className="border-2 border-dashed border-hr-border rounded-lg p-6 text-center hover:border-hr-accent transition-colors cursor-pointer"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onClick={() => document.getElementById('file-upload')?.click()}
+            >
+              <Upload className="w-8 h-8 text-hr-text-muted mx-auto mb-2" />
+              <p className="text-sm text-hr-text-primary mb-1">Kéo thả CV vào đây</p>
+              <p className="text-xs text-hr-text-muted mb-2">hoặc</p>
+              <button className="px-4 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+                Chọn file
+              </button>
+              <p className="text-xs text-hr-text-muted mt-2">
+                Hỗ trợ: PDF, DOC, DOCX, ZIP (tối đa 20MB)
+              </p>
+            </div>
+            
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.zip"
+              onChange={(e) => handleFileUpload(e.target.files)}
+              className="hidden"
+            />
+            
+            {uploadedFiles.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <h4 className="text-sm font-medium text-hr-text-primary">Files đã chọn:</h4>
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-hr-bg-secondary rounded p-2">
                     <div className="flex items-center gap-2">
-                      <Badge 
-                        className={
-                          portal.status === "Connected" 
-                            ? "bg-green-100 text-green-800" 
-                            : "bg-red-100 text-red-800"
-                        }
-                      >
-                        {portal.status}
-                      </Badge>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="border-hr-border text-hr-text-primary"
-                      >
-                        {portal.status === "Connected" ? "Sync Now" : "Connect"}
-                      </Button>
+                      <FileText className="w-4 h-4 text-hr-text-muted" />
+                      <span className="text-sm text-hr-text-primary">{file.name}</span>
+                      <span className="text-xs text-hr-text-muted">
+                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
                     </div>
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
+                <button className="w-full px-4 py-2 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+                  Upload {uploadedFiles.length} files
+                </button>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            )}
+            
+            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors text-sm flex items-center justify-center gap-2">
+              <Upload className="w-4 h-4" />
+              Upload nhiều CV cùng lúc
+            </button>
+          </div>
 
-        {/* Embed Code Tab */}
-        <TabsContent value="embed" className="space-y-4">
-          <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary">Embed Code Generator</CardTitle>
-              <CardDescription className="text-hr-text-secondary">
-                Generate embed code for your company website
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="website-url" className="text-hr-text-primary">Website URL</Label>
-                <Input
-                  id="website-url"
-                  placeholder="https://yourcompany.com"
-                  className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
-                />
+          {/* Web Form */}
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="w-5 h-5 text-hr-accent" />
+              <h3 className="font-medium text-hr-text-primary">Form nộp CV trên website</h3>
+            </div>
+            
+            <p className="text-sm text-hr-text-muted mb-3">
+              Nhúng form vào website công ty
+            </p>
+            
+            <div className="space-y-2">
+              <div className="bg-hr-bg-secondary rounded p-2">
+                <code className="text-xs text-hr-text-primary break-all">
+                  {embedCode}
+                </code>
               </div>
               
-              <Button 
-                onClick={generateEmbedCode}
-                className="bg-hr-primary text-white hover:bg-hr-primary/90"
+              <button
+                onClick={copyEmbedCode}
+                className="w-full px-3 py-1 bg-hr-bg-secondary border border-hr-border rounded text-sm hover:bg-hr-bg-tertiary transition-colors flex items-center justify-center gap-2"
               >
-                <Code className="mr-2 h-4 w-4" />
-                Generate Embed Code
-              </Button>
+                <Copy className="w-4 h-4" />
+                Copy Code
+              </button>
               
-              {embedCode && (
-                <div className="space-y-2">
-                  <Label className="text-hr-text-primary">Embed Code</Label>
-                  <div className="relative">
-                    <textarea
-                      value={embedCode}
-                      readOnly
-                      className="w-full h-32 p-3 bg-hr-bg-primary border border-hr-border rounded-lg text-hr-text-primary font-mono text-sm"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={copyEmbedCode}
-                      className="absolute top-2 right-2 border-hr-border text-hr-text-primary"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-sm text-hr-text-secondary">
-                    Copy this code and paste it into your website's HTML
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <a
+                href="/career-page"
+                target="_blank"
+                className="w-full px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary transition-colors flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Xem trang tuyển dụng
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Import Status */}
+      <div className="bg-hr-bg-secondary rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-hr-text-primary mb-4">
+          Trạng thái Import
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="font-medium text-green-800">Thành công</span>
+            </div>
+            <p className="text-2xl font-bold text-green-600">1,247</p>
+            <p className="text-sm text-green-600">CVs imported today</p>
+          </div>
+          
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <span className="font-medium text-yellow-800">Đang xử lý</span>
+            </div>
+            <p className="text-2xl font-bold text-yellow-600">23</p>
+            <p className="text-sm text-yellow-600">CVs processing</p>
+          </div>
+          
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="font-medium text-red-800">Lỗi</span>
+            </div>
+            <p className="text-2xl font-bold text-red-600">5</p>
+            <p className="text-sm text-red-600">CVs failed</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
-
-
-
-
-
-

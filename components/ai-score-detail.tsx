@@ -1,255 +1,377 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { X, Star, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react"
+import { useState } from 'react'
+import { 
+  Star, 
+  Target, 
+  Briefcase, 
+  Wrench, 
+  GraduationCap, 
+  FileText,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Lightbulb,
+  BarChart3,
+  Brain,
+  Sparkles
+} from 'lucide-react'
 
-interface AIScoreDetailProps {
-  cv: {
-    id: string
-    name: string
-    email: string
-    aiScore: number
-    jobMatch: number
-    experience: number
-    skills: number
-    education: number
-    cvQuality: number
-    strengths: string[]
-    weaknesses: string[]
-    missingSkills: string[]
-    redFlags: string[]
-    recommendations: string[]
-  }
-  onClose: () => void
+interface AIScoreBreakdown {
+  overallScore: number
+  jobMatch: number
+  experience: number
+  skills: number
+  education: number
+  cvQuality: number
+  strengths: string[]
+  weaknesses: string[]
+  missingSkills: string[]
+  redFlags: string[]
+  recommendations: Array<{
+    type: string
+    label: string
+    icon: string
+    action: string
+  }>
 }
 
-export default function AIScoreDetail({ cv, onClose }: AIScoreDetailProps) {
+interface AIScoreDetailProps {
+  candidateId: string
+  candidateName: string
+  scoreData: AIScoreBreakdown
+  onExecuteAction: (actionType: string) => void
+  onViewComparison: () => void
+}
+
+export default function AIScoreDetail({
+  candidateId,
+  candidateName,
+  scoreData,
+  onExecuteAction,
+  onViewComparison
+}: AIScoreDetailProps) {
+  const [activeTab, setActiveTab] = useState<'breakdown' | 'insights' | 'recommendations' | 'comparison'>('breakdown')
+
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600"
-    if (score >= 60) return "text-yellow-600"
-    return "text-red-600"
+    if (score >= 85) return 'text-green-600'
+    if (score >= 70) return 'text-blue-600'
+    if (score >= 50) return 'text-yellow-600'
+    return 'text-red-600'
   }
 
-  const getScoreBadgeColor = (score: number) => {
-    if (score >= 80) return "bg-green-100 text-green-800"
-    if (score >= 60) return "bg-yellow-100 text-yellow-800"
-    return "bg-red-100 text-red-800"
+  const getScoreBgColor = (score: number) => {
+    if (score >= 85) return 'bg-green-100'
+    if (score >= 70) return 'bg-blue-100'
+    if (score >= 50) return 'bg-yellow-100'
+    return 'bg-red-100'
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-hr-bg-secondary border-hr-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-hr-text-primary">AI Score Analysis</CardTitle>
-            <CardDescription className="text-hr-text-secondary">
-              Detailed breakdown for {cv.name}
-            </CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Overall Score */}
-          <div className="text-center">
-            <div className="relative inline-flex items-center justify-center w-32 h-32">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  className="text-gray-200"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - cv.aiScore / 100)}`}
-                  className={getScoreColor(cv.aiScore)}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className={`text-3xl font-bold ${getScoreColor(cv.aiScore)}`}>
-                    {cv.aiScore}%
-                  </div>
-                  <div className="text-sm text-hr-text-secondary">Overall Score</div>
-                </div>
+  const getRecommendationText = (score: number) => {
+    if (score >= 85) return '✅ Highly Recommended'
+    if (score >= 70) return '👍 Good Candidate'
+    if (score >= 50) return '⚠️ Consider with Caution'
+    return '❌ Not Recommended'
+  }
+
+  const getRecommendationColor = (score: number) => {
+    if (score >= 85) return 'text-green-600'
+    if (score >= 70) return 'text-blue-600'
+    if (score >= 50) return 'text-yellow-600'
+    return 'text-red-600'
+  }
+
+  const CircularProgress = ({ value, size = 'large' }: { value: number; size?: 'small' | 'medium' | 'large' }) => {
+    const sizeClasses = {
+      small: 'w-16 h-16',
+      medium: 'w-20 h-20',
+      large: 'w-24 h-24'
+    }
+    
+    const strokeWidth = size === 'small' ? 3 : size === 'medium' ? 4 : 6
+    const radius = size === 'small' ? 30 : size === 'medium' ? 36 : 42
+    const circumference = 2 * Math.PI * radius
+    const strokeDasharray = circumference
+    const strokeDashoffset = circumference - (value / 100) * circumference
+
+    return (
+      <div className={`relative ${sizeClasses[size]}`}>
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="none"
+            className="text-gray-200"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset={strokeDashoffset}
+            className={`transition-all duration-500 ${getScoreColor(value)}`}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`font-bold ${size === 'small' ? 'text-lg' : size === 'medium' ? 'text-xl' : 'text-2xl'} ${getScoreColor(value)}`}>
+            {value}%
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  const ScoreItem = ({ 
+    label, 
+    value, 
+    icon, 
+    tooltip 
+  }: { 
+    label: string
+    value: number
+    icon: React.ReactNode
+    tooltip: string
+  }) => (
+    <div className="flex items-center justify-between p-3 bg-hr-bg-primary rounded-lg">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-hr-accent/10 rounded-lg">
+          {icon}
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-hr-text-primary">{label}</span>
+            <div className="group relative">
+              <div className="w-4 h-4 text-hr-text-muted cursor-help">?</div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                {tooltip}
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-24 bg-gray-200 rounded-full h-2">
+          <div 
+            className={`h-2 rounded-full transition-all duration-500 ${getScoreBgColor(value)}`}
+            style={{ width: `${value}%` }}
+          ></div>
+        </div>
+        <span className={`font-medium w-12 text-right ${getScoreColor(value)}`}>
+          {value}%
+        </span>
+      </div>
+    </div>
+  )
 
-          {/* Score Breakdown */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-hr-bg-primary border-hr-border">
-              <CardHeader>
-                <CardTitle className="text-hr-text-primary text-lg">Score Breakdown</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-hr-text-primary">Job Match</span>
-                    <Badge className={getScoreBadgeColor(cv.jobMatch)}>
-                      {cv.jobMatch}%
-                    </Badge>
-                  </div>
-                  <Progress value={cv.jobMatch} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-hr-text-primary">Experience</span>
-                    <Badge className={getScoreBadgeColor(cv.experience)}>
-                      {cv.experience}%
-                    </Badge>
-                  </div>
-                  <Progress value={cv.experience} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-hr-text-primary">Skills</span>
-                    <Badge className={getScoreBadgeColor(cv.skills)}>
-                      {cv.skills}%
-                    </Badge>
-                  </div>
-                  <Progress value={cv.skills} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-hr-text-primary">Education</span>
-                    <Badge className={getScoreBadgeColor(cv.education)}>
-                      {cv.education}%
-                    </Badge>
-                  </div>
-                  <Progress value={cv.education} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-hr-text-primary">CV Quality</span>
-                    <Badge className={getScoreBadgeColor(cv.cvQuality)}>
-                      {cv.cvQuality}%
-                    </Badge>
-                  </div>
-                  <Progress value={cv.cvQuality} className="h-2" />
-                </div>
-              </CardContent>
-            </Card>
+  return (
+    <div className="bg-hr-bg-secondary rounded-lg p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-hr-accent/10 rounded-lg">
+            <Brain className="w-6 h-6 text-hr-accent" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-hr-text-primary">AI Analysis</h3>
+            <p className="text-sm text-hr-text-muted">{candidateName}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onViewComparison}
+            className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-primary transition-colors flex items-center gap-1"
+          >
+            <BarChart3 className="w-4 h-4" />
+            So sánh
+          </button>
+        </div>
+      </div>
 
-            {/* AI Insights */}
-            <Card className="bg-hr-bg-primary border-hr-border">
-              <CardHeader>
-                <CardTitle className="text-hr-text-primary text-lg">AI Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Strengths
-                  </h4>
-                  <ul className="space-y-1">
-                    {cv.strengths.map((strength, index) => (
-                      <li key={index} className="text-sm text-hr-text-secondary flex items-center gap-2">
-                        <Star className="h-3 w-3 text-green-600" />
-                        {strength}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-yellow-600 mb-2 flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Areas for Improvement
-                  </h4>
-                  <ul className="space-y-1">
-                    {cv.weaknesses.map((weakness, index) => (
-                      <li key={index} className="text-sm text-hr-text-secondary flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 text-yellow-600" />
-                        {weakness}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    Red Flags
-                  </h4>
-                  <ul className="space-y-1">
-                    {cv.redFlags.map((flag, index) => (
-                      <li key={index} className="text-sm text-hr-text-secondary flex items-center gap-2">
-                        <AlertTriangle className="h-3 w-3 text-red-600" />
-                        {flag}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Overall Score */}
+      <div className="text-center mb-8">
+        <CircularProgress value={scoreData.overallScore} />
+        <h4 className="text-lg font-semibold text-hr-text-primary mt-4">AI Score</h4>
+        <p className={`font-medium ${getRecommendationColor(scoreData.overallScore)}`}>
+          {getRecommendationText(scoreData.overallScore)}
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-hr-border mb-6">
+        {[
+          { id: 'breakdown', label: 'Chi tiết đánh giá', icon: BarChart3 },
+          { id: 'insights', label: 'AI Insights', icon: Sparkles },
+          { id: 'recommendations', label: 'Đề xuất', icon: Lightbulb },
+          { id: 'comparison', label: 'So sánh', icon: TrendingUp }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-hr-accent text-hr-accent'
+                : 'border-transparent text-hr-text-muted hover:text-hr-text-primary'
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'breakdown' && (
+        <div className="space-y-4">
+          <h4 className="font-medium text-hr-text-primary mb-4">Chi tiết đánh giá:</h4>
+          
+          <ScoreItem
+            label="Job Match"
+            value={scoreData.jobMatch}
+            icon={<Target className="w-5 h-5 text-hr-accent" />}
+            tooltip="Độ phù hợp với JD"
+          />
+          
+          <ScoreItem
+            label="Experience"
+            value={scoreData.experience}
+            icon={<Briefcase className="w-5 h-5 text-hr-accent" />}
+            tooltip="Kinh nghiệm làm việc"
+          />
+          
+          <ScoreItem
+            label="Skills Match"
+            value={scoreData.skills}
+            icon={<Wrench className="w-5 h-5 text-hr-accent" />}
+            tooltip="Kỹ năng yêu cầu"
+          />
+          
+          <ScoreItem
+            label="Education"
+            value={scoreData.education}
+            icon={<GraduationCap className="w-5 h-5 text-hr-accent" />}
+            tooltip="Trình độ học vấn"
+          />
+          
+          <ScoreItem
+            label="CV Quality"
+            value={scoreData.cvQuality}
+            icon={<FileText className="w-5 h-5 text-hr-accent" />}
+            tooltip="Chất lượng CV"
+          />
+        </div>
+      )}
+
+      {activeTab === 'insights' && (
+        <div className="space-y-6">
+          {/* Strengths */}
+          <div>
+            <h4 className="font-medium text-green-600 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Điểm mạnh:
+            </h4>
+            <ul className="space-y-2">
+              {scoreData.strengths.map((strength, index) => (
+                <li key={index} className="flex items-start gap-2 text-hr-text-primary">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>{strength}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Weaknesses */}
+          <div>
+            <h4 className="font-medium text-orange-600 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Điểm yếu:
+            </h4>
+            <ul className="space-y-2">
+              {scoreData.weaknesses.map((weakness, index) => (
+                <li key={index} className="flex items-start gap-2 text-hr-text-primary">
+                  <span className="text-orange-500 mt-1">⚠</span>
+                  <span>{weakness}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Missing Skills */}
-          {cv.missingSkills.length > 0 && (
-            <Card className="bg-hr-bg-primary border-hr-border">
-              <CardHeader>
-                <CardTitle className="text-hr-text-primary text-lg">Missing Skills</CardTitle>
-                <CardDescription className="text-hr-text-secondary">
-                  Skills that would improve the candidate's profile
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {cv.missingSkills.map((skill, index) => (
-                    <Badge key={index} variant="outline" className="border-hr-border text-hr-text-primary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div>
+            <h4 className="font-medium text-red-600 mb-3 flex items-center gap-2">
+              <XCircle className="w-5 h-5" />
+              Kỹ năng thiếu:
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {scoreData.missingSkills.map((skill, index) => (
+                <span key={index} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
 
-          {/* Recommendations */}
-          <Card className="bg-hr-bg-primary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary text-lg">AI Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Red Flags */}
+          {scoreData.redFlags.length > 0 && (
+            <div>
+              <h4 className="font-medium text-red-600 mb-3 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                Red Flags:
+              </h4>
               <ul className="space-y-2">
-                {cv.recommendations.map((recommendation, index) => (
-                  <li key={index} className="text-sm text-hr-text-secondary flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    {recommendation}
+                {scoreData.redFlags.map((flag, index) => (
+                  <li key={index} className="flex items-start gap-2 text-red-600">
+                    <AlertTriangle className="w-4 h-4 mt-0.5" />
+                    <span>{flag}</span>
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
-        </CardContent>
-      </Card>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'recommendations' && (
+        <div className="space-y-4">
+          <h4 className="font-medium text-hr-text-primary mb-4">💡 Đề xuất:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {scoreData.recommendations.map((rec, index) => (
+              <button
+                key={index}
+                onClick={() => onExecuteAction(rec.type)}
+                className="p-3 bg-hr-bg-primary border border-hr-border rounded-lg hover:bg-hr-accent/5 hover:border-hr-accent transition-colors text-left"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">{rec.icon}</span>
+                  <span className="font-medium text-hr-text-primary">{rec.label}</span>
+                </div>
+                <p className="text-sm text-hr-text-muted">{rec.action}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'comparison' && (
+        <div className="space-y-4">
+          <h4 className="font-medium text-hr-text-primary mb-4">So sánh với ứng viên khác:</h4>
+          <div className="bg-hr-bg-primary rounded-lg p-4">
+            <div className="text-center text-hr-text-muted">
+              <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>Biểu đồ so sánh sẽ được hiển thị ở đây</p>
+              <p className="text-sm">So sánh điểm số với các ứng viên khác cho cùng vị trí</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-
-
-
-
-
-
