@@ -151,11 +151,11 @@ export async function POST(request: NextRequest) {
 
 function getEventColor(type: string): string {
   switch (type) {
-    case 'interview': return '#3b82f6'
-    case 'meeting': return '#10b981'
-    case 'deadline': return '#ef4444'
-    case 'onboarding': return '#8b5cf6'
-    case 'training': return '#f59e0b'
+    case 'interview': return '#6366f1' // hr-primary
+    case 'meeting': return '#10b981' // hr-success
+    case 'deadline': return '#ef4444' // hr-danger
+    case 'onboarding': return '#8b5cf6' // hr-purple
+    case 'training': return '#f59e0b' // hr-warning
     default: return '#6b7280'
   }
 }

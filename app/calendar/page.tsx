@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { Calendar as CalendarIcon } from '@/components/ui/calendar'
+import { Calendar as CalendarIcon, Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { 
   Calendar as CalendarIconLucide, 
@@ -108,6 +108,10 @@ export default function CalendarPage() {
   const [eventTypeFilter, setEventTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [draggedEvent, setDraggedEvent] = useState<CalendarEvent | null>(null)
+  const [dragOverDate, setDragOverDate] = useState<Date | null>(null)
+  const [candidates, setCandidates] = useState<any[]>([])
+  const [showCandidateSelector, setShowCandidateSelector] = useState(false)
   const [stats, setStats] = useState<CalendarStats>({
     totalEvents: 0,
     todayEvents: 0,
@@ -150,6 +154,23 @@ export default function CalendarPage() {
     fetchEvents()
   }, [])
 
+  // Fetch candidates for interview scheduling
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        const response = await fetch('/api/candidates')
+        if (response.ok) {
+          const data = await response.json()
+          setCandidates(data.candidates || [])
+        }
+      } catch (error) {
+        console.error('Error fetching candidates:', error)
+      }
+    }
+
+    fetchCandidates()
+  }, [])
+
   // Mock data for demonstration
   const getMockEvents = (): CalendarEvent[] => [
     {
@@ -173,7 +194,7 @@ export default function CalendarPage() {
       videoLink: 'https://zoom.us/j/123456789',
       meetingId: '123 456 789',
       meetingPassword: 'interview123',
-      color: '#3b82f6',
+      color: '#6366f1', // hr-primary
       reminder: 15
     },
     {
@@ -189,7 +210,7 @@ export default function CalendarPage() {
       priority: 'medium',
       attendees: ['team@company.com'],
       isVideoCall: false,
-      color: '#10b981',
+      color: '#10b981', // hr-success
       reminder: 5
     },
     {
@@ -212,7 +233,7 @@ export default function CalendarPage() {
       platform: 'google_meet',
       videoLink: 'https://meet.google.com/abc-defg-hij',
       meetingId: 'abc-defg-hij',
-      color: '#3b82f6',
+      color: '#6366f1', // hr-primary
       reminder: 30
     },
     {
@@ -226,7 +247,7 @@ export default function CalendarPage() {
       description: 'Deadline for Senior Developer applications',
       priority: 'urgent',
       isAllDay: true,
-      color: '#ef4444',
+      color: '#ef4444', // hr-danger
       reminder: 60
     }
   ]
@@ -280,13 +301,103 @@ export default function CalendarPage() {
   const getEventColor = (event: CalendarEvent) => {
     if (event.color) return event.color
     switch (event.type) {
-      case 'interview': return '#3b82f6'
-      case 'meeting': return '#10b981'
-      case 'deadline': return '#ef4444'
-      case 'onboarding': return '#8b5cf6'
+      case 'interview': return '#6366f1' // hr-primary
+      case 'meeting': return '#10b981' // hr-success
+      case 'deadline': return '#ef4444' // hr-danger
+      case 'onboarding': return '#8b5cf6' // hr-purple
       case 'training': return '#f59e0b'
       default: return '#6b7280'
     }
+  }
+
+  // Drag & Drop handlers
+  const handleDragStart = (event: React.DragEvent, calendarEvent: CalendarEvent) => {
+    setDraggedEvent(calendarEvent)
+    event.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (event: React.DragEvent, date: Date) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    setDragOverDate(date)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverDate(null)
+  }
+
+  const handleDrop = (event: React.DragEvent, targetDate: Date) => {
+    event.preventDefault()
+    
+    if (draggedEvent) {
+      const newDate = format(targetDate, 'yyyy-MM-dd')
+      const updatedEvent = { ...draggedEvent, date: newDate }
+      
+      setEvents(prev => prev.map(e => e.id === draggedEvent.id ? updatedEvent : e))
+      setFilteredEvents(prev => prev.map(e => e.id === draggedEvent.id ? updatedEvent : e))
+      
+      // TODO: Call API to update event
+      console.log('Event moved to:', newDate)
+    }
+    
+    setDraggedEvent(null)
+    setDragOverDate(null)
+  }
+
+  const handleCreateEvent = (date: Date) => {
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title: 'New Event',
+      type: 'meeting',
+      status: 'scheduled',
+      startTime: '09:00',
+      endTime: '10:00',
+      date: format(date, 'yyyy-MM-dd'),
+      description: '',
+      priority: 'medium',
+      attendees: [],
+      isVideoCall: false,
+      color: '#6366f1',
+      reminder: 15
+    }
+    
+    setEvents(prev => [...prev, newEvent])
+    setFilteredEvents(prev => [...prev, newEvent])
+    setSelectedEvent(newEvent)
+    setShowEventDialog(true)
+  }
+
+  const handleCreateInterview = (candidate: any, date: Date) => {
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title: `Interview - ${candidate.firstName} ${candidate.lastName}`,
+      type: 'interview',
+      status: 'scheduled',
+      startTime: '10:00',
+      endTime: '11:00',
+      date: format(date, 'yyyy-MM-dd'),
+      candidateName: `${candidate.firstName} ${candidate.lastName}`,
+      candidateEmail: candidate.email,
+      position: candidate.currentPosition || 'Position',
+      interviewer: 'HR Manager',
+      location: 'Meeting Room A',
+      description: `Technical interview for ${candidate.currentPosition || 'Position'} position`,
+      priority: 'high',
+      attendees: [candidate.email, 'hr@company.com'],
+      isVideoCall: true,
+      platform: 'zoom',
+      videoLink: `https://zoom.us/j/${Date.now()}`,
+      meetingId: Date.now().toString(),
+      meetingPassword: 'interview123',
+      color: '#6366f1',
+      reminder: 30
+    }
+    
+    setEvents(prev => [...prev, newEvent])
+    setFilteredEvents(prev => [...prev, newEvent])
+    setSelectedEvent(newEvent)
+    setShowEventDialog(true)
+    setShowCandidateSelector(false)
   }
 
   const getPriorityColor = (priority: string) => {
@@ -342,9 +453,15 @@ export default function CalendarPage() {
           return (
             <div
               key={day.toISOString()}
-              className={`bg-white p-1 min-h-[120px] ${
+              className={`bg-white p-1 min-h-[120px] relative group ${
                 !isCurrentMonth ? 'text-gray-400' : ''
-              } ${isToday ? 'bg-blue-50' : ''}`}
+              } ${isToday ? 'bg-hr-bg-primary/10' : ''} ${
+                dragOverDate && isSameDay(day, dragOverDate) ? 'bg-hr-primary/20 border-2 border-hr-primary border-dashed' : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, day)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, day)}
+              onDoubleClick={() => handleCreateEvent(day)}
             >
               <div className={`text-sm font-medium mb-1 ${
                 isToday ? 'text-blue-600' : ''
@@ -358,6 +475,8 @@ export default function CalendarPage() {
                     className="text-xs p-1 rounded cursor-pointer hover:opacity-80 hover:shadow-md transition-all"
                     style={{ backgroundColor: getEventColor(event) + '20', color: getEventColor(event) }}
                     onClick={() => setSelectedEvent(event)}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, event)}
                   >
                     <div className="flex items-center space-x-1">
                       {event.isVideoCall && <Video className="h-3 w-3" />}
@@ -370,6 +489,14 @@ export default function CalendarPage() {
                     +{dayEvents.length - 3} more
                   </div>
                 )}
+                {/* Quick add button */}
+                <button
+                  className="w-full text-xs text-gray-400 hover:text-hr-primary hover:bg-hr-bg-primary/10 rounded p-1 transition-all opacity-0 group-hover:opacity-100"
+                  onClick={() => handleCreateEvent(day)}
+                  title="Tạo sự kiện mới"
+                >
+                  + Thêm sự kiện
+                </button>
               </div>
             </div>
           )
@@ -620,6 +747,14 @@ export default function CalendarPage() {
             <Button variant="outline" onClick={() => setCurrentDate(new Date())}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Today
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCandidateSelector(true)}
+              className="bg-hr-primary/10 text-hr-primary hover:bg-hr-primary hover:text-white"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Tạo phỏng vấn
             </Button>
             <Button onClick={() => setShowEventDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -924,6 +1059,51 @@ export default function CalendarPage() {
             platform: 'zoom'
           }}
         />
+
+        {/* Candidate Selector Dialog */}
+        <Dialog open={showCandidateSelector} onOpenChange={setShowCandidateSelector}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Tạo lịch phỏng vấn</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Chọn ứng viên</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 max-h-60 overflow-y-auto">
+                  {candidates.map(candidate => (
+                    <div
+                      key={candidate.id}
+                      className="p-3 border rounded-lg hover:bg-hr-bg-primary/10 cursor-pointer transition-all"
+                      onClick={() => {
+                        const today = new Date()
+                        handleCreateInterview(candidate, today)
+                      }}
+                    >
+                      <div className="font-medium">{candidate.firstName} {candidate.lastName}</div>
+                      <div className="text-sm text-gray-600">{candidate.email}</div>
+                      <div className="text-sm text-gray-500">{candidate.currentPosition}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Hoặc chọn ngày cụ thể</Label>
+                <div className="mt-2">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date)
+                      }
+                    }}
+                    className="rounded-md border"
+                  />
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </ProtectedRoute>
   )
