@@ -73,7 +73,8 @@ export default function CandidatesPage() {
         status: statusFilter
       })
 
-      const response = await fetch(`/api/candidates?${params}`)
+      // Connect to real backend API
+      const response = await fetch(`http://localhost:5000/api/candidates?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch candidates')
       }

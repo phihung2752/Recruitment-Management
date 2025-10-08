@@ -159,7 +159,8 @@ export default function JobPostingsPage() {
       try {
         setLoading(true)
         const token = localStorage.getItem('token')
-        const response = await fetch('/api/job-postings', {
+        // Connect to real backend API
+        const response = await fetch('http://localhost:5000/api/job-postings', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

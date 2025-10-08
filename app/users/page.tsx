@@ -132,10 +132,12 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading users...</p>
+      <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-hr-primary" />
+            <p className="text-hr-text-secondary">Đang tải dữ liệu người dùng...</p>
+          </div>
         </div>
       </div>
     )
