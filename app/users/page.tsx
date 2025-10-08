@@ -142,35 +142,24 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Button 
-                variant="ghost" 
-                onClick={() => router.push('/dashboard-sqlserver')}
-                className="mr-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <Users className="h-8 w-8 text-blue-600 mr-3" />
-              <h1 className="text-xl font-semibold text-gray-900">
-                User Management
-              </h1>
-            </div>
-            <Button onClick={() => setShowAddForm(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add User
-            </Button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <div className="flex items-center space-x-3">
+          <Users className="h-8 w-8 text-hr-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">Quản lý người dùng</h1>
+            <p className="text-hr-text-secondary">Quản lý tài khoản và phân quyền người dùng</p>
           </div>
         </div>
-      </header>
+        <Button onClick={() => setShowAddForm(true)} className="bg-hr-primary hover:bg-hr-primary/90">
+          <UserPlus className="h-4 w-4 mr-2" />
+          Tạo người dùng mới
+        </Button>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-6">
         {error && (
           <Alert variant="destructive" className="mb-6">
             <AlertDescription>{error}</AlertDescription>
@@ -338,7 +327,7 @@ export default function UsersPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   )
 }
