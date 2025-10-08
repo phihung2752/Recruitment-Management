@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import ProtectedRoute from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -480,8 +479,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <ProtectedRoute>
-      <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
+    <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
@@ -838,6 +836,5 @@ export default function AdminDashboard() {
         </TabsContent>
       </Tabs>
       </div>
-    </ProtectedRoute>
   )
 }

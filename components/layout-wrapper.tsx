@@ -31,8 +31,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     }
   }, [isAuthenticated, loading, isPublicPage, pathname, router])
   
-  // Hiển thị loading khi đang kiểm tra authentication
-  if (loading) {
+  // Hiển thị loading khi đang kiểm tra authentication (chỉ cho trang không public)
+  if (loading && !isPublicPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
