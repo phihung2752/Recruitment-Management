@@ -18,21 +18,25 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   
   // Các trang không cần sidebar và header
   const publicPages = ['/login', '/forgot-password', '/reset-password', '/test', '/simple-login']
+  
+  // Các trang tạm thời bỏ qua authentication để test
+  const testPages = ['/dashboard', '/candidates', '/job-postings', '/interviews', '/reports', '/analytics', '/settings']
+  const isTestPage = testPages.includes(pathname)
   const isPublicPage = publicPages.includes(pathname)
   
   useEffect(() => {
-    // Nếu chưa đăng nhập và không phải trang public, redirect đến login
-    if (!loading && !isAuthenticated && !isPublicPage) {
+    // Nếu chưa đăng nhập và không phải trang public hoặc test page, redirect đến login
+    if (!loading && !isAuthenticated && !isPublicPage && !isTestPage) {
       router.push('/login')
     }
     // Nếu đã đăng nhập và đang ở trang login, redirect đến dashboard
     if (!loading && isAuthenticated && pathname === '/login') {
       router.push('/dashboard')
     }
-  }, [isAuthenticated, loading, isPublicPage, pathname, router])
+  }, [isAuthenticated, loading, isPublicPage, isTestPage, pathname, router])
   
-  // Hiển thị loading khi đang kiểm tra authentication (chỉ cho trang không public)
-  if (loading && !isPublicPage) {
+  // Hiển thị loading khi đang kiểm tra authentication (chỉ cho trang không public và không phải test page)
+  if (loading && !isPublicPage && !isTestPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
@@ -43,8 +47,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     )
   }
   
-  // Nếu chưa đăng nhập và không phải trang public, hiển thị loading
-  if (!isAuthenticated && !isPublicPage) {
+  // Nếu chưa đăng nhập và không phải trang public hoặc test page, hiển thị loading
+  if (!isAuthenticated && !isPublicPage && !isTestPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <div className="text-center">
