@@ -453,6 +453,76 @@ namespace HRManagementSystem.Controllers
             }
         }
 
+        [HttpGet("reports")]
+        public async Task<IActionResult> GetReports()
+        {
+            try
+            {
+                // Mock reports data
+                var reports = new List<object>
+                {
+                    new
+                    {
+                        id = "report-001",
+                        title = "Recruitment Summary Report",
+                        type = "Recruitment",
+                        description = "Monthly summary of recruitment activities",
+                        generatedAt = DateTime.Now.AddDays(-1),
+                        status = "Completed",
+                        fileSize = "2.5 MB",
+                        downloadUrl = "/api/admin/reports/report-001/download"
+                    },
+                    new
+                    {
+                        id = "report-002", 
+                        title = "Candidate Performance Analysis",
+                        type = "Analytics",
+                        description = "Analysis of candidate performance metrics",
+                        generatedAt = DateTime.Now.AddDays(-2),
+                        status = "Completed",
+                        fileSize = "1.8 MB",
+                        downloadUrl = "/api/admin/reports/report-002/download"
+                    },
+                    new
+                    {
+                        id = "report-003",
+                        title = "Interview Statistics",
+                        type = "Interview",
+                        description = "Weekly interview statistics and trends",
+                        generatedAt = DateTime.Now.AddDays(-3),
+                        status = "Completed", 
+                        fileSize = "1.2 MB",
+                        downloadUrl = "/api/admin/reports/report-003/download"
+                    },
+                    new
+                    {
+                        id = "report-004",
+                        title = "Hiring Pipeline Report",
+                        type = "Pipeline",
+                        description = "Current hiring pipeline status",
+                        generatedAt = DateTime.Now.AddDays(-5),
+                        status = "Completed",
+                        fileSize = "3.1 MB", 
+                        downloadUrl = "/api/admin/reports/report-004/download"
+                    }
+                };
+
+                return Ok(new
+                {
+                    reports = reports,
+                    totalCount = reports.Count,
+                    page = 1,
+                    pageSize = 10,
+                    totalPages = 1
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching reports: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
         private async Task<int> GetCountAsync(SqlConnection connection, string query)
         {
             using var command = new SqlCommand(query, connection);
