@@ -113,7 +113,7 @@ export function EnhancedCalendar() {
               className={cn(
                 "h-20 p-0 font-normal",
                 !isSameMonth(day, currentDate) && "text-muted-foreground",
-                isSameDay(day, selectedDate) && "bg-accent text-accent-foreground"
+                selectedDate && isSameDay(day, selectedDate) && "bg-accent text-accent-foreground"
               )}
               onClick={() => setSelectedDate(day)}
             >

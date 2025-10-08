@@ -194,9 +194,9 @@ export function CVMatcher() {
                           <Badge
                             variant={
                               candidate.matchScore >= 90
-                                ? "success"
+                                ? "default"
                                 : candidate.matchScore >= 70
-                                ? "warning"
+                                ? "secondary"
                                 : "destructive"
                             }
                           >

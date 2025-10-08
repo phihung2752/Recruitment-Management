@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(realData)
       }
     } catch (backendError) {
-      console.log('Backend not available for job postings, using mock data:', backendError.message)
+      console.log('Backend not available for job postings, using mock data:', backendError instanceof Error ? backendError.message : 'Unknown error')
     }
 
     // Fallback to mock data

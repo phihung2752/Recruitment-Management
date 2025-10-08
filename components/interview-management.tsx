@@ -8,16 +8,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { InterviewRoundsConfig } from "./interview-rounds-config"
 import { CandidateList } from "./candidate-list"
 import { CandidateInterviewTracking } from "./candidate-interview-tracking"
-import { InterviewScheduler } from "./interview-scheduler"
+// import { InterviewScheduler } from "./interview-scheduler"
 import { InterviewNotifications } from "./interview-notifications"
 import { OnlineInterviewSupport } from "./online-interview-support"
 import { InterviewResultsRecorder } from "./interview-results-recorder"
-import { AIInterviewAssistant } from "./ai-interview-assistant"
+import AIInterviewAssistant from "./ai-interview-assistant"
 import { InPersonInterviewManagement } from "./in-person-interview-management"
 import { CandidateEvaluation } from "./candidate-evaluation"
 import { InterviewFeedback } from "./interview-feedback"
 import { InterviewQuestionsManager } from "./interview-questions-manager"
-import { InterviewAnalytics } from "./interview-analytics"
+import InterviewAnalytics from "./interview-analytics"
 
 export interface Candidate {
   id: string
@@ -186,7 +186,10 @@ export default function InterviewManagement() {
 
           {activeTabIndex === 2 && (
             <div className="w-full max-w-full overflow-hidden">
-              <InterviewScheduler candidates={candidates} interviewRounds={interviewRounds} />
+              {/* <InterviewScheduler 
+                onScheduleInterview={() => {}}
+                onSubmitFeedback={() => {}}
+              /> */}
             </div>
           )}
 
@@ -244,7 +247,7 @@ export default function InterviewManagement() {
 
           {activeTabIndex === 11 && (
             <div className="w-full max-w-full overflow-hidden">
-              <AIInterviewAssistant candidates={candidates} interviewRounds={interviewRounds} />
+              <AIInterviewAssistant />
             </div>
           )}
         </div>

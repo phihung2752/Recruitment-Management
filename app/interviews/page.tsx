@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import ProtectedRoute from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,10 +12,10 @@ import {
   Calendar, 
   Plus, 
   Search, 
-  Clock, 
   Users, 
   Bot,
   Brain,
+  Clock, 
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -42,6 +43,137 @@ export default function InterviewsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(5) // Chỉ hiện 5 CVs
+  const [processingRound, setProcessingRound] = useState(false)
+
+  // Pass/Fail Round functions
+  const handlePassRound = async () => {
+    if (!selectedCandidate) return
+    
+    setProcessingRound(true)
+    try {
+      // Update candidate status and interview rounds
+      const updatedCandidates = candidates.map(candidate => {
+        if (candidate.id === selectedCandidate.id) {
+          const updatedRounds = candidate.interviewRounds.map((round: any) => {
+            if (round.status === 'current') {
+              return { ...round, status: 'passed' }
+            }
+            return round
+          })
+          
+          // Check if all rounds are passed
+          const allPassed = updatedRounds.every((round: any) => round.status === 'passed')
+          const newStatus = allPassed ? 'Hired' : 'Interviewed'
+          
+          return {
+            ...candidate,
+            status: newStatus,
+            interviewRounds: updatedRounds
+          }
+        }
+        return candidate
+      })
+      
+      setCandidates(updatedCandidates)
+      setSelectedCandidate(updatedCandidates.find(c => c.id === selectedCandidate.id))
+      
+      toast({
+        title: "Success",
+        description: "Round passed successfully!",
+        variant: "default"
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to pass round",
+        variant: "destructive"
+      })
+    } finally {
+      setProcessingRound(false)
+    }
+  }
+
+  const handleFailRound = async () => {
+    if (!selectedCandidate) return
+    
+    setProcessingRound(true)
+    try {
+      // Update candidate status and interview rounds
+      const updatedCandidates = candidates.map(candidate => {
+        if (candidate.id === selectedCandidate.id) {
+          const updatedRounds = candidate.interviewRounds.map((round: any) => {
+            if (round.status === 'current') {
+              return { ...round, status: 'failed' }
+            }
+            return round
+          })
+          
+          return {
+            ...candidate,
+            status: 'Rejected',
+            interviewRounds: updatedRounds
+          }
+        }
+        return candidate
+      })
+      
+      setCandidates(updatedCandidates)
+      setSelectedCandidate(updatedCandidates.find(c => c.id === selectedCandidate.id))
+      
+      toast({
+        title: "Round Failed",
+        description: "Candidate has been rejected",
+        variant: "destructive"
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process round",
+        variant: "destructive"
+      })
+    } finally {
+      setProcessingRound(false)
+    }
+  }
+
+  // Pagination logic
+  const totalPages = Math.ceil(candidates.length / pageSize)
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const paginatedCandidates = candidates.slice(startIndex, endIndex)
+
+  // Generate mock interview rounds based on candidate status
+  const generateMockInterviewRounds = (status: string) => {
+    const rounds = [
+      { id: 1, name: "Phone Screening", status: "passed", date: "2025-09-25", interviewer: "HR Team" },
+      { id: 2, name: "Technical Interview", status: "passed", date: "2025-09-26", interviewer: "Tech Lead" },
+      { id: 3, name: "Final Interview", status: "current", date: "2025-09-27", interviewer: "Hiring Manager" }
+    ]
+
+    switch (status) {
+      case "Hired":
+        return rounds.map(round => ({ ...round, status: "passed" }))
+      case "Rejected":
+        return rounds.map((round, index) => ({ 
+          ...round, 
+          status: index < 2 ? "passed" : "failed" 
+        }))
+      case "Interviewed":
+        return rounds.map((round, index) => ({ 
+          ...round, 
+          status: index < 2 ? "passed" : "current" 
+        }))
+      case "Applied":
+        return rounds.map((round, index) => ({ 
+          ...round, 
+          status: index === 0 ? "current" : "pending" 
+        }))
+      default:
+        return rounds.map(round => ({ ...round, status: "pending" }))
+    }
+  }
 
   // Fetch candidates from API
   const fetchCandidates = async () => {
@@ -50,9 +182,20 @@ export default function InterviewsPage() {
       const response = await fetch(`/api/admin/candidates?search=${encodeURIComponent(searchTerm)}&status=${statusFilter}`)
       if (response.ok) {
         const data = await response.json()
-        setCandidates(data.candidates || [])
-        if (data.candidates && data.candidates.length > 0 && !selectedCandidate) {
-          setSelectedCandidate(data.candidates[0])
+        // Filter chỉ qualified candidates (Applied, Interviewed, Hired)
+        const qualifiedCandidates = (data.candidates || []).filter((candidate: any) => 
+          ['Applied', 'Interviewed', 'Hired'].includes(candidate.status)
+        )
+        
+        // Add mock interview rounds to each candidate
+        const candidatesWithRounds = qualifiedCandidates.map((candidate: any) => ({
+          ...candidate,
+          interviewRounds: generateMockInterviewRounds(candidate.status)
+        }))
+        
+        setCandidates(candidatesWithRounds)
+        if (candidatesWithRounds.length > 0 && !selectedCandidate) {
+          setSelectedCandidate(candidatesWithRounds[0])
         }
       } else {
         console.error('Failed to fetch candidates')
@@ -82,11 +225,12 @@ export default function InterviewsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "passed": return "bg-green-50 text-green-700 border border-green-200"
-      case "current": return "bg-blue-50 text-blue-700 border border-blue-200"
-      case "pending": return "bg-amber-50 text-amber-700 border border-amber-200"
-      case "failed": return "bg-red-50 text-red-700 border border-red-200"
-      default: return "bg-gray-50 text-gray-700 border border-gray-200"
+      case "Hired": return "bg-green-600 text-white"
+      case "Rejected": return "bg-red-600 text-white"
+      case "Interviewed": return "bg-blue-600 text-white"
+      case "Applied": return "bg-yellow-500 text-black"
+      case "Pending": return "bg-orange-500 text-white"
+      default: return "bg-gray-600 text-white"
     }
   }
 
@@ -105,68 +249,6 @@ export default function InterviewsPage() {
     if (score >= 80) return "text-blue-700"
     if (score >= 70) return "text-amber-700"
     return "text-red-700"
-  }
-
-  const handlePassRound = async () => {
-    console.log('🚀 Pass Round clicked')
-    try {
-      const response = await fetch('/api/email/send-invitation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateEmail: selectedCandidate?.email,
-          candidateName: selectedCandidate?.name,
-          position: selectedCandidate?.position,
-          interviewDate: new Date(),
-          location: "Office"
-        })
-      })
-
-      if (response.ok) {
-        toast({
-          title: "Round Passed",
-          description: "Gmail notification sent to candidate",
-        })
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      toast({
-        title: "Error",
-        description: "Failed to send notification",
-        variant: "destructive"
-      })
-    }
-  }
-
-  const handleFailRound = async () => {
-    console.log('🚀 Fail Round clicked')
-    try {
-      const response = await fetch('/api/email/send-invitation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateEmail: selectedCandidate?.email,
-          candidateName: selectedCandidate?.name,
-          position: selectedCandidate?.position,
-          interviewDate: new Date(),
-          location: "Office"
-        })
-      })
-
-      if (response.ok) {
-        toast({
-          title: "Round Failed",
-          description: "Gmail notification sent to candidate",
-        })
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      toast({
-        title: "Error",
-        description: "Failed to send notification",
-        variant: "destructive"
-      })
-    }
   }
 
   const handleCollectCVs = async () => {
@@ -236,7 +318,8 @@ export default function InterviewsPage() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <ProtectedRoute requiredPermissions={['interview.read']}>
+      <div className="space-y-4 p-4 bg-hr-bg-primary text-hr-text-primary min-h-screen">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
         <div>
@@ -268,9 +351,9 @@ export default function InterviewsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
         {/* Left Column - Candidates List */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -281,42 +364,70 @@ export default function InterviewsPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder={t("Search candidates...")}
-                    className="pl-10"
+                    placeholder="Search candidates..."
+                    className="pl-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 
                 <div className="space-y-3">
-                  {candidates.map((candidate) => (
+                  {paginatedCandidates.map((candidate) => (
                     <Card 
                       key={candidate.id} 
-                      className={`cursor-pointer transition-colors ${
-                        selectedCandidate?.id === candidate.id ? 'ring-2 ring-blue-500' : ''
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                        selectedCandidate?.id === candidate.id ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
                       onClick={() => setSelectedCandidate(candidate)}
                     >
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-3">
-                            <Avatar className="h-10 w-10">
+                            <Avatar className="h-12 w-12 ring-2 ring-gray-200 dark:ring-gray-700">
                               <AvatarImage src={candidate.avatar} />
-                              <AvatarFallback>
-                                {candidate.name.split(' ').map((n: string) => n[0]).join('')}
+                              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white font-semibold">
+                                {`${candidate.firstName?.[0] || ''}${candidate.lastName?.[0] || ''}`}
                               </AvatarFallback>
                             </Avatar>
-    <div>
-                              <h3 className="font-medium">{candidate.name}</h3>
-                              <p className="text-sm text-muted-foreground">{candidate.position}</p>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                                {`${candidate.firstName || ''} ${candidate.lastName || ''}`}
+                              </h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                                {candidate.currentPosition || 'N/A'}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {candidate.email}
+                              </p>
                             </div>
                           </div>
-                          <Badge className={getStatusColor(candidate.status)}>
-                            {t(candidate.status)}
+                          <Badge className={`${getStatusColor(candidate.status)} font-medium px-2 py-1`}>
+                            {candidate.status}
                           </Badge>
                         </div>
+                        
+                        {/* Skills Preview */}
+                        {candidate.skills && (
+                          <div className="mt-2">
+                            <div className="flex flex-wrap gap-1">
+                              {candidate.skills.split(',').slice(0, 3).map((skill: string, index: number) => (
+                                <span 
+                                  key={index}
+                                  className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
+                                >
+                                  {skill.trim()}
+                                </span>
+                              ))}
+                              {candidate.skills.split(',').length > 3 && (
+                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
+                                  +{candidate.skills.split(',').length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <span>{candidate.email}</span>
@@ -330,6 +441,38 @@ export default function InterviewsPage() {
                       </CardContent>
                     </Card>
                   ))}
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Showing {startIndex + 1} to {Math.min(endIndex, candidates.length)} of {candidates.length} candidates
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className="bg-white dark:bg-gray-800"
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className="bg-white dark:bg-gray-800"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -337,7 +480,7 @@ export default function InterviewsPage() {
         </div>
 
         {/* Right Column - Interview Progress & AI Analysis */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           {selectedCandidate ? (
             <div className="space-y-6">
               {/* Interview Progress */}
@@ -349,20 +492,22 @@ export default function InterviewsPage() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                        className="bg-green-600 text-white border-green-600 hover:bg-green-700 disabled:opacity-50"
                         onClick={handlePassRound}
+                        disabled={processingRound || !selectedCandidate}
                       >
                         <CheckCircle className="mr-1 h-4 w-4" />
-                        {t("Pass Round")}
+                        {processingRound ? "Processing..." : "Pass Round"}
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                        className="bg-red-600 text-white border-red-600 hover:bg-red-700 disabled:opacity-50"
                         onClick={handleFailRound}
+                        disabled={processingRound || !selectedCandidate}
                       >
                         <XCircle className="mr-1 h-4 w-4" />
-                        {t("Fail Round")}
+                        {processingRound ? "Processing..." : "Fail Round"}
                       </Button>
                     </div>
                   </div>
@@ -370,32 +515,39 @@ export default function InterviewsPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium mb-4">Interview Rounds</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedCandidate.interviewRounds.map((round: any) => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(selectedCandidate.interviewRounds || []).map((round: any) => {
                         const StatusIcon = getStatusIcon(round.status)
                         return (
                           <div 
                             key={round.id}
                             className={`flex items-center space-x-3 p-4 border rounded-lg transition-all ${
-                              round.status === 'current' ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                              round.status === 'current' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20' : 
+                              round.status === 'passed' ? 'bg-green-50 dark:bg-green-900/20' :
+                              round.status === 'failed' ? 'bg-red-50 dark:bg-red-900/20' :
+                              'bg-gray-50 dark:bg-gray-800'
                             }`}
                           >
                             <div className={`p-2 rounded-full ${
-                              round.status === 'passed' ? 'bg-green-100 text-green-600' : 
-                              round.status === 'current' ? 'bg-blue-100 text-blue-600' : 
-                              round.status === 'failed' ? 'bg-red-100 text-red-600' :
-                              'bg-gray-100 text-gray-600'
+                              round.status === 'passed' ? 'bg-green-600 text-white' : 
+                              round.status === 'current' ? 'bg-purple-600 text-white' : 
+                              round.status === 'failed' ? 'bg-red-600 text-white' :
+                              'bg-gray-400 text-white'
                             }`}>
                               <StatusIcon className="h-4 w-4" />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-medium">{round.name}</h4>
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{round.name}</h4>
+                              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
                                 <Avatar className="h-6 w-6">
                                   <AvatarImage src={round.interviewerAvatar} />
-                                  <AvatarFallback>{round.interviewer.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
+                                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs">
+                                    {round.interviewer.split(' ').map((n: string) => n[0]).join('')}
+                                  </AvatarFallback>
                                 </Avatar>
-                                <span>{round.interviewer}</span>
+                                <span className="font-medium">{round.interviewer}</span>
+                                <span>•</span>
+                                <span>{round.date}</span>
                               </div>
                             </div>
                             <Badge className={getStatusColor(round.status)}>
@@ -518,5 +670,6 @@ export default function InterviewsPage() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   )
 }

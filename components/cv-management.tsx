@@ -15,7 +15,7 @@ import type { CV, CVFilter, InterviewFeedbackForm } from "@/types/cv-management"
 import { AdvancedCVFilter } from "./advanced-cv-filter"
 import { CVGridView } from "./cv-grid-view"
 import { CVListView } from "./cv-list-view"
-import { InterviewScheduler } from "./interview-scheduler"
+// import { InterviewScheduler } from "./interview-scheduler"
 import { RecruitmentAnalytics } from "./recruitment-analytics"
 import { CVComparison } from "./cv-comparison"
 import { BulkActions } from "./bulk-actions"
@@ -135,7 +135,7 @@ export function CVManagement() {
         skills: ["Java", "Spring", "SQL"],
         source: "Indeed",
         appliedDate: new Date(),
-        status: "Interviewing",
+        status: "Interviewed",
         matchPercentage: 90,
         tags: ["Potential"],
         interviewStatus: "Scheduled",
@@ -154,7 +154,7 @@ export function CVManagement() {
         skills: ["Python", "Pandas", "Scikit-learn"],
         source: "Glassdoor",
         appliedDate: new Date(),
-        status: "Applied",
+        status: "New",
         matchPercentage: 75,
         tags: ["Need Review"],
         interviewStatus: "Pending",
@@ -187,7 +187,7 @@ export function CVManagement() {
           skills: ["Node.js", "Express.js", "MongoDB"],
           source: "Indeed",
           appliedDate: new Date(),
-          status: "Hired",
+          status: "Completed",
           matchPercentage: 95,
           tags: ["Priority", "Technical"],
           interviewStatus: "Completed",
@@ -263,7 +263,7 @@ export function CVManagement() {
     )
   }
 
-  const handleScheduleInterview = (cvId: string, date: Date, link: string, platform: string) => {
+  const handleScheduleInterview = (cvId: string, date: Date, link: string) => {
     setCVs(
       cvs.map((cv) => {
         if (cv.id === cvId) {
@@ -271,7 +271,7 @@ export function CVManagement() {
             ...cv,
             interviewDate: date,
             interviewLink: link,
-            interviewPlatform: platform,
+            interviewPlatform: "Zoom",
             interviewStatus: "Scheduled",
             progressStage: "Interview Scheduled",
           }
@@ -282,7 +282,7 @@ export function CVManagement() {
 
     toast({
       title: "Interview Scheduled",
-      description: `Interview scheduled for ${platform} on ${date.toLocaleString()}. Link: ${link}`,
+      description: `Interview scheduled for Zoom on ${date.toLocaleString()}. Link: ${link}`,
     })
   }
 
@@ -444,7 +444,7 @@ export function CVManagement() {
         skills: ["Node.js", "Express.js", "MongoDB"],
         source: "Indeed",
         appliedDate: new Date(),
-        status: "Hired",
+        status: "Completed",
         matchPercentage: 95,
         tags: ["Priority", "Technical"],
         interviewStatus: "Completed",
@@ -585,7 +585,7 @@ export function CVManagement() {
               </DialogContent>
             </Dialog>
             <div className="overflow-auto max-h-[calc(100vh-300px)]">
-              <ScrollArea className="w-full" orientation="both">
+              <ScrollArea className="w-full">
                 {viewMode === "list" ? (
                   <CVListView
                     cvs={currentItems}
@@ -595,6 +595,7 @@ export function CVManagement() {
                     }
                     onTagCV={handleTagCV}
                     onScheduleInterview={handleScheduleInterview}
+                    onRefresh={async () => {}}
                     visibleColumns={visibleColumns}
                     availableTags={availableTags}
                   />
@@ -607,6 +608,7 @@ export function CVManagement() {
                     }
                     onTagCV={handleTagCV}
                     onScheduleInterview={handleScheduleInterview}
+                    onRefresh={async () => {}}
                     availableTags={availableTags}
                   />
                 )}
@@ -673,12 +675,12 @@ export function CVManagement() {
         </TabsContent>
 
         <TabsContent value="interviews">
-          <InterviewScheduler
+          {/* <InterviewScheduler
             cvs={cvs}
             onScheduleInterview={handleScheduleInterview}
             onSubmitFeedback={handleInterviewFeedback}
           />
-          <OnlineInterviewIntegration />
+          <OnlineInterviewIntegration /> */}
         </TabsContent>
 
         <TabsContent value="analytics">

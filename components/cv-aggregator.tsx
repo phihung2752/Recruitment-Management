@@ -139,7 +139,7 @@ export function CVAggregator() {
                         </p>
                       </div>
                       <Badge
-                        variant={board.status === "connected" ? "success" : "destructive"}
+                        variant={board.status === "connected" ? "default" : "destructive"}
                       >
                         {board.status}
                       </Badge>
@@ -202,7 +202,7 @@ export function CVAggregator() {
                               ? "default"
                               : cv.status === "reviewed"
                               ? "secondary"
-                              : "success"
+                              : "default"
                           }
                         >
                           {cv.status}

@@ -1,92 +1,77 @@
 version: '3.8'
 
 services:
-  # HR Management API
-  hrmanagement-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: hrmanagement-api
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: hr_mysql
     restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=172.29.196.213;Port=3306;Database=hr_system;User ID=root;Password=275202;
-      - JwtSettings__SecretKey=ProductionSecretKeyThatIsAtLeast32CharactersLong!@#$$%^&*()
-      - JwtSettings__Issuer=HRManagementAPI
-      - JwtSettings__Audience=HRManagementClient
-      - JwtSettings__ExpiryInMinutes=60
-      - GoogleGemini__ApiKey=${GOOGLE_GEMINI_API_KEY}
-      - GoogleGemini__ApiUrl=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: hr_management_system
+      MYSQL_USER: hr_admin
+      MYSQL_PASSWORD: HRAdmin123!
     ports:
-      - "8080:8080"
+      - "3306:3306"
     volumes:
-      - api_uploads:/app/uploads
-      - api_logs:/app/logs
+      - mysql_data:/var/lib/mysql
+      - ./database-schema-mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/add-candidates-only.sql:/docker-entrypoint-initdb.d/02-candidates.sql
+      - ./database/add-job-postings.sql:/docker-entrypoint-initdb.d/03-job-postings.sql
+      - ./database/complete-job-postings.sql:/docker-entrypoint-initdb.d/04-complete-jobs.sql
     networks:
-      - hrmanagement-network
+      - hr_network
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "hr_admin", "-pHRAdmin123!"]
+      timeout: 20s
+      retries: 10
 
-  # Next.js Frontend
-  hrmanagement-frontend:
+  # HR Management System App
+  hr_app:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
-    container_name: hrmanagement-frontend
+      dockerfile: Dockerfile.simple
+    container_name: hr_management_app
     restart: unless-stopped
+    ports:
+      - "3001:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://hrmanagement-api:8080
-    ports:
-      - "3000:3000"
+      - DATABASE_HOST=mysql
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=hr_management_system
+      - DATABASE_USER=hr_admin
+      - DATABASE_PASSWORD=HRAdmin123!
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - NEXTAUTH_URL=http://localhost:3001
+      - NEXTAUTH_SECRET=your-nextauth-secret-change-in-production
     depends_on:
-      - hrmanagement-api
+      mysql:
+        condition: service_healthy
     networks:
-      - hrmanagement-network
+      - hr_network
+    volumes:
+      - ./uploads:/app/uploads
 
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: hrmanagement-nginx
+  # Adminer for database management (optional)
+  adminer:
+    image: adminer:latest
+    container_name: hr_adminer
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
     depends_on:
-      - hrmanagement-api
-      - hrmanagement-frontend
+      - mysql
     networks:
-      - hrmanagement-network
-
-  # Redis for Caching (Optional)
-  redis:
-    image: redis:7-alpine
-    container_name: hrmanagement-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - hrmanagement-network
-    command: redis-server --appendonly yes
+      - hr_network
 
 volumes:
-  api_uploads:
-    driver: local
-  api_logs:
-    driver: local
-  redis_data:
+  mysql_data:
     driver: local
 
 networks:
-  hrmanagement-network:
+  hr_network:
     driver: bridge

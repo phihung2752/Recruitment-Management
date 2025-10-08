@@ -11,8 +11,12 @@ export function AutomatedStatusUpdate({ cvs, onUpdateCV }: AutomatedStatusUpdate
     const interval = setInterval(() => {
       const now = new Date()
       cvs.forEach(cv => {
-        if (cv.status === "Published" && cv.expirationDate && cv.expirationDate < now) {
-          onUpdateCV({ ...cv, status: "Expired" })
+        if (cv.status === "Reviewing" && cv.appliedDate) {
+          const appliedDate = new Date(cv.appliedDate)
+          const daysSinceApplied = Math.floor((now.getTime() - appliedDate.getTime()) / (1000 * 60 * 60 * 24))
+          if (daysSinceApplied > 30) {
+            onUpdateCV({ ...cv, status: "Expired" })
+          }
         }
       })
     }, 60000) // Check every minute

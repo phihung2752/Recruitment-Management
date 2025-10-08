@@ -3,7 +3,21 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { User, CheckCircle, Clock } from "lucide-react"
-import type { Candidate, InterviewRound } from "./interview-management"
+
+interface Candidate {
+  id: number
+  firstName: string
+  lastName: string
+  currentRound: number
+}
+
+interface InterviewRound {
+  id: number
+  name: string
+  status: 'pending' | 'current' | 'passed' | 'failed'
+  date?: string
+  interviewer: string
+}
 
 interface InterviewTrackingTreeProps {
   candidate: Candidate
@@ -13,21 +27,21 @@ interface InterviewTrackingTreeProps {
 export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewTrackingTreeProps) {
   const getStatusIcon = (index: number) => {
     if (index < candidate.currentRound - 1) {
-      return <CheckCircle className="h-5 w-5 text-green-500" />
+      return <CheckCircle className="h-5 w-5 text-green-600" />
     } else if (index === candidate.currentRound - 1) {
-      return <Clock className="h-5 w-5 text-blue-500" />
+      return <Clock className="h-5 w-5 text-hr-primary" />
     } else {
-      return <User className="h-5 w-5 text-gray-400" />
+      return <User className="h-5 w-5 text-hr-text-secondary" />
     }
   }
 
   const getStatusColor = (index: number) => {
     if (index < candidate.currentRound - 1) {
-      return "bg-green-100 border-green-300 dark:bg-green-900 dark:border-green-700"
+      return "bg-green-50 border-green-200 text-green-800"
     } else if (index === candidate.currentRound - 1) {
-      return "bg-blue-100 border-blue-300 dark:bg-blue-900 dark:border-blue-700"
+      return "bg-hr-primary bg-opacity-10 border-hr-primary text-hr-primary"
     } else {
-      return "bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+      return "bg-hr-bg-primary border-hr-border text-hr-text-secondary"
     }
   }
 
@@ -41,10 +55,10 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
     }
   }
 
-  // Triangle layout for ≤4 rounds, pyramid for >4 rounds
+  // Triangle layout for ≤4 rounds
   if (interviewRounds.length <= 4) {
     return (
-      <div className="flex flex-col items-center space-y-6 py-8">
+      <div className="relative flex flex-col items-center space-y-6 py-8">
         {/* Triangle Layout */}
         {interviewRounds.length >= 4 && (
           <div className="flex justify-center">
@@ -53,7 +67,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
                 <div className="flex flex-col items-center space-y-2">
                   {getStatusIcon(3)}
                   <p className="text-sm font-medium">{interviewRounds[3]?.name}</p>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                     {getStatusText(3)}
                   </Badge>
                 </div>
@@ -69,7 +83,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
                 <div className="flex flex-col items-center space-y-2">
                   {getStatusIcon(2)}
                   <p className="text-sm font-medium">{interviewRounds[2]?.name}</p>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                     {getStatusText(2)}
                   </Badge>
                 </div>
@@ -81,7 +95,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
                   <div className="flex flex-col items-center space-y-2">
                     {getStatusIcon(3)}
                     <p className="text-sm font-medium">{interviewRounds[3]?.name}</p>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                       {getStatusText(3)}
                     </Badge>
                   </div>
@@ -98,7 +112,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
                 <div className="flex flex-col items-center space-y-2">
                   {getStatusIcon(1)}
                   <p className="text-sm font-medium">{interviewRounds[1]?.name}</p>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                     {getStatusText(1)}
                   </Badge>
                 </div>
@@ -114,7 +128,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
               <div className="flex flex-col items-center space-y-2">
                 {getStatusIcon(0)}
                 <p className="text-sm font-medium">{interviewRounds[0]?.name}</p>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                   {getStatusText(0)}
                 </Badge>
               </div>
@@ -147,7 +161,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
             <div className="flex flex-col items-center space-y-2">
               {getStatusIcon(interviewRounds.length - 1)}
               <p className="text-xs font-medium">{interviewRounds[interviewRounds.length - 1]?.name}</p>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                 {getStatusText(interviewRounds.length - 1)}
               </Badge>
             </div>
@@ -172,7 +186,7 @@ export function InterviewTrackingTree({ candidate, interviewRounds }: InterviewT
                     <div className="flex flex-col items-center space-y-1">
                       {getStatusIcon(roundIndex)}
                       <p className="text-xs font-medium">{interviewRounds[roundIndex]?.name}</p>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-hr-border text-hr-text-primary">
                         {getStatusText(roundIndex)}
                       </Badge>
                     </div>

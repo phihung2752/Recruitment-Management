@@ -340,10 +340,12 @@ export default function EmployeesPage() {
 
   // Handlers
   const handleSelectEmployee = (employee: Employee) => {
+    console.log('🔥 handleSelectEmployee called with:', employee)
     setSelectedEmployee(employee)
   }
 
   const handleCreateEmployee = async () => {
+    console.log('🔥 handleCreateEmployee called with formData:', formData)
     // Mock implementation - replace with actual API call
     toast({
       title: t("Success"),
@@ -365,6 +367,7 @@ export default function EmployeesPage() {
   }
 
   const handleBulkAction = async (action: string) => {
+    console.log('🔥 handleBulkAction called with action:', action, 'selectedEmployees:', selectedEmployees)
     if (selectedEmployees.length === 0) {
       toast({
         title: t("No Selection"),
@@ -404,6 +407,7 @@ export default function EmployeesPage() {
   }
 
   const handleExport = () => {
+    console.log('🔥 handleExport called')
     const exportData = (
       selectedEmployees.length > 0 ? safeEmployees.filter((e) => selectedEmployees.includes(e.id)) : filteredEmployees
     ).map((employee) => ({

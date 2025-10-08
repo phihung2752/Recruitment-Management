@@ -60,7 +60,7 @@ export function CVComparison({ cvs }: CVComparisonProps) {
                   <TableCell className="font-medium">{criteria.charAt(0).toUpperCase() + criteria.slice(1)}</TableCell>
                   {selectedCVData.map((cv) => (
                     <TableCell key={cv.id}>
-                      {criteria === 'skills' ? cv[criteria].join(', ') : cv[criteria]}
+                      {criteria === 'skills' ? (cv as any)[criteria]?.join(', ') || '' : (cv as any)[criteria] || ''}
                     </TableCell>
                   ))}
                 </TableRow>

@@ -48,7 +48,7 @@ export function RecruitmentReport({ jobPostings }: RecruitmentReportProps) {
             </SelectContent>
           </Select>
           <DatePickerWithRange
-            date={dateRange}
+            date={dateRange as { from: Date; to: Date } || { from: new Date(), to: new Date() }}
             onDateChange={setDateRange}
           />
           <Button onClick={handleGenerateReport}>Generate Report</Button>

@@ -1,237 +1,128 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { useRouter } from "next/navigation"
-import {
-  authService,
-  type LoginCredentials,
-  type User,
-  type GoogleAuthRequest,
-  type RegisterRequest,
-} from "@/src/api/services/auth"
-import { toast } from "@/components/ui/use-toast"
+import React, { createContext, useContext, useState, useEffect } from 'react'
+
+interface User {
+  id: number
+  username: string
+  email: string
+  firstName: string
+  lastName: string
+  status: string
+  roles: string[]
+  permissions: string[]
+}
 
 interface AuthContextType {
   user: User | null
-  isLoading: boolean
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  googleLogin: (googleData: GoogleAuthRequest) => Promise<void>
-  register: (registerData: RegisterRequest) => Promise<void>
-  logout: () => Promise<void>
-  checkPermission: (permission: string) => boolean
-  checkRole: (role: string | string[]) => boolean
+  loading: boolean
+  login: (username: string, password: string) => Promise<boolean>
+  logout: () => void
+  hasPermission: (permission: string) => boolean
+  hasRole: (role: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [loading, setLoading] = useState(true)
 
+  // Check if user is logged in on mount
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const token = localStorage.getItem("auth_token")
-        if (token) {
-          const response = await authService.getProfile()
-          if (response.success && response.data) {
-            setUser(response.data)
-          } else {
-            localStorage.removeItem("auth_token")
-            localStorage.removeItem("refresh_token")
-          }
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error)
-        localStorage.removeItem("auth_token")
-        localStorage.removeItem("refresh_token")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    initAuth()
+    checkAuth()
   }, [])
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true)
+  const checkAuth = async () => {
     try {
-      const credentials: LoginCredentials = { email, password }
-      const response = await authService.login(credentials)
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setLoading(false)
+        return
+      }
 
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        localStorage.setItem("auth_token", response.data.token)
-        localStorage.setItem("refresh_token", response.data.refreshToken)
-        router.push("/")
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${response.data.user.firstName} ${response.data.user.lastName}!`,
-        })
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUser(data.user)
       } else {
-        throw new Error(response.error || "Login failed")
+        localStorage.removeItem('token')
       }
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
-        variant: "destructive",
-      })
-      throw error
+      console.error('Auth check error:', error)
+      localStorage.removeItem('token')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  const googleLogin = async (googleData: GoogleAuthRequest) => {
-    setIsLoading(true)
+  const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await authService.googleLogin(googleData)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      })
 
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        localStorage.setItem("auth_token", response.data.token)
-        localStorage.setItem("refresh_token", response.data.refreshToken)
-        router.push("/")
-        toast({
-          title: "Login successful",
-          description: `Welcome, ${response.data.user.firstName} ${response.data.user.lastName}!`,
-        })
+      const data = await response.json()
+
+      if (data.success) {
+        localStorage.setItem('token', data.token)
+        setUser(data.user)
+        return true
       } else {
-        throw new Error(response.error || "Google login failed")
+        return false
       }
     } catch (error) {
-      toast({
-        title: "Google login failed",
-        description: error instanceof Error ? error.message : "Authentication failed",
-        variant: "destructive",
-      })
-      throw error
-    } finally {
-      setIsLoading(false)
+      console.error('Login error:', error)
+      return false
     }
   }
 
-  const register = async (registerData: RegisterRequest) => {
-    setIsLoading(true)
-    try {
-      const response = await authService.register(registerData)
-
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        localStorage.setItem("auth_token", response.data.token)
-        localStorage.setItem("refresh_token", response.data.refreshToken)
-        router.push("/")
-        toast({
-          title: "Registration successful",
-          description: `Welcome, ${response.data.user.firstName} ${response.data.user.lastName}!`,
-        })
-      } else {
-        throw new Error(response.error || "Registration failed")
-      }
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Registration failed",
-        variant: "destructive",
-      })
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
+  const logout = () => {
+    localStorage.removeItem('token')
+    setUser(null)
   }
 
-  const logout = async () => {
-    setIsLoading(true)
-    try {
-      await authService.logout()
-      setUser(null)
-      localStorage.removeItem("auth_token")
-      localStorage.removeItem("refresh_token")
-      router.push("/login")
-      toast({
-        title: "Logout successful",
-        description: "You have been logged out successfully.",
-      })
-    } catch (error) {
-      console.error("Logout error:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const checkPermission = (permission: string) => {
+  const hasPermission = (permission: string): boolean => {
     if (!user) return false
-
-    // Admin has all permissions
-    if (user.role === "Admin") return true
-
-    const permissionRoleMap: Record<string, string[]> = {
-      "users.view": ["Admin", "HR"],
-      "users.create": ["Admin"],
-      "users.edit": ["Admin"],
-      "users.delete": ["Admin"],
-      "employees.view": ["Admin", "HR", "Manager"],
-      "employees.create": ["Admin", "HR"],
-      "employees.edit": ["Admin", "HR", "Manager"],
-      "employees.delete": ["Admin"],
-      "candidates.view": ["Admin", "HR", "Manager"],
-      "candidates.create": ["Admin", "HR"],
-      "candidates.edit": ["Admin", "HR"],
-      "candidates.delete": ["Admin", "HR"],
-      "jobs.view": ["Admin", "HR", "Manager"],
-      "jobs.create": ["Admin", "HR", "Manager"],
-      "jobs.edit": ["Admin", "HR", "Manager"],
-      "jobs.delete": ["Admin", "HR"],
-      "interviews.view": ["Admin", "HR", "Manager"],
-      "interviews.create": ["Admin", "HR", "Manager"],
-      "interviews.edit": ["Admin", "HR", "Manager"],
-      "interviews.delete": ["Admin", "HR"],
-      "calendar.view": ["Admin", "HR", "Manager", "Employee"],
-      "calendar.create": ["Admin", "HR", "Manager", "Employee"],
-      "calendar.edit": ["Admin", "HR", "Manager", "Employee"],
-      "calendar.delete": ["Admin", "HR", "Manager"],
-      "dashboard.view": ["Admin", "HR", "Manager"],
-      "gmail.use": ["Admin", "HR", "Manager"],
-    }
-
-    const allowedRoles = permissionRoleMap[permission] || []
-    return allowedRoles.includes(user.role)
+    return user.permissions.includes(permission) || user.roles.includes('Admin')
   }
 
-  const checkRole = (role: string | string[]) => {
+  const hasRole = (role: string): boolean => {
     if (!user) return false
-    if (Array.isArray(role)) {
-      return role.includes(user.role)
-    }
-    return user.role === role
+    return user.roles.includes(role) || user.roles.includes('Admin')
+  }
+
+  const value = {
+    user,
+    isAuthenticated: !!user,
+    loading,
+    login,
+    logout,
+    hasPermission,
+    hasRole
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated: !!user,
-        login,
-        googleLogin,
-        register,
-        logout,
-        checkPermission,
-        checkRole,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }

@@ -33,12 +33,12 @@ export function AdvancedSearch() {
   const locations = ["Remote", "On-site", "Hybrid"]
   const stages = ["Screening", "Technical", "Cultural", "Final"]
 
-  const toggleFilter = (category: keyof SearchFilters, value: string) => {
+  const toggleFilter = (category: keyof Omit<SearchFilters, 'rating'>, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter(item => item !== value)
-        : [...prev[category], value]
+      [category]: (prev[category] as string[]).includes(value)
+        ? (prev[category] as string[]).filter(item => item !== value)
+        : [...(prev[category] as string[]), value]
     }))
   }
 

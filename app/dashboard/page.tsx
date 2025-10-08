@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import ProtectedRoute from "@/components/protected-route"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { useTheme } from "@/contexts/theme-context"
+// import { useTheme } from "@/design-system/theme-provider"
 import { 
   Search, Plus, X, Bell, Sun, Moon, Download, 
   Users, UserPlus, FileText, Calendar, BarChart3, 
@@ -46,14 +47,14 @@ interface RecentActivity {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalCandidates: 0,
-    totalJobPostings: 0,
+    totalUsers: 3,
+    totalCandidates: 15,
+    totalJobPostings: 7,
     totalInterviews: 0,
-    pendingApprovals: 0,
-    activeRecruitments: 0,
-    completedHires: 0,
-    systemHealth: 0
+    pendingApprovals: 5,
+    activeRecruitments: 2,
+    completedHires: 2,
+    systemHealth: 95
   })
   
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
@@ -63,31 +64,233 @@ export default function AdminDashboard() {
     to: addDays(new Date(), 7),
   })
   const [activeTab, setActiveTab] = useState("overview")
-  const { theme, toggleTheme } = useTheme()
+  // const { theme, toggleTheme } = useTheme()
 
   // Load data from API
   useEffect(() => {
+    console.log('🔧 Dashboard useEffect running')
     loadDashboardData()
+  }, [])
+
+
+  // Add debugging for button clicks
+  useEffect(() => {
+    console.log('🔧 Dashboard component mounted, setting up debug listeners')
+    
+    // Test if buttons are clickable
+    const testButtonClick = (buttonName: string) => {
+      console.log(`🔥 ${buttonName} button test - JavaScript is working!`)
+    }
+    
+    // Make test function globally available
+    (window as any).testButtonClick = testButtonClick
+    
+    // Test basic functionality
+    console.log('✅ Dashboard JavaScript is loaded and working')
+    
+    // Add click listeners to all buttons for debugging
+    setTimeout(() => {
+      const allButtons = document.querySelectorAll('button')
+      console.log(`🔍 Found ${allButtons.length} buttons on page`)
+      
+      allButtons.forEach((button, index) => {
+        button.addEventListener('click', (e) => {
+          console.log(`🔥 Button ${index} clicked via addEventListener:`, button.textContent?.trim())
+        })
+      })
+    }, 1000)
   }, [])
 
   const loadDashboardData = async () => {
     try {
-      // Load stats
+      // Load stats from API (no auth required)
       const statsResponse = await fetch('/api/admin/stats')
+      
       if (statsResponse.ok) {
         const statsData = await statsResponse.json()
         setStats(statsData)
       }
 
-      // Load recent activities
+      // Load recent activities from API (no auth required)
       const activitiesResponse = await fetch('/api/admin/activities')
+      
       if (activitiesResponse.ok) {
         const activitiesData = await activitiesResponse.json()
         setRecentActivities(activitiesData)
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error)
+      console.error('❌ Error loading dashboard data:', error)
+      // Keep default values if there's an error
     }
+  }
+
+  const handleExportReport = async () => {
+    console.log('🔥 Exporting dashboard Excel report...')
+    
+    try {
+      // Call backend API to generate Excel file
+      const response = await fetch('/api/reports/dashboard-excel', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      // Get the blob data
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = 'dashboard-report.xlsx'
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/)
+        if (filenameMatch) {
+          filename = filenameMatch[1]
+        }
+      } else {
+        // Fallback to default filename with date
+        filename = `dashboard-report-${new Date().toISOString().split('T')[0]}.xlsx`
+      }
+      
+      link.download = filename
+      link.style.display = 'none'
+      
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      
+      // Safe removal
+      if (link.parentNode) {
+        document.body.removeChild(link)
+      }
+      
+      // Clean up
+      window.URL.revokeObjectURL(url)
+      
+      console.log('✅ Excel report exported successfully!')
+      
+      // Show success message (optional)
+      // You can add a toast notification here if you have one
+      
+    } catch (error) {
+      console.error('❌ Error exporting Excel report:', error)
+      
+      // Fallback to CSV export if Excel fails
+      console.log('🔄 Falling back to CSV export...')
+      handleExportCSV()
+    }
+  }
+
+  const handleExportCSV = () => {
+    console.log('🔥 Exporting dashboard CSV report...')
+    
+    // Create report data
+    const reportData = {
+      title: "Báo cáo Dashboard HR Management System",
+      generatedAt: new Date().toLocaleString('vi-VN'),
+      stats: stats,
+      activities: recentActivities.slice(0, 10), // Last 10 activities
+      summary: {
+        totalUsers: stats.totalUsers,
+        totalCandidates: stats.totalCandidates,
+        totalJobPostings: stats.totalJobPostings,
+        totalInterviews: stats.totalInterviews,
+        systemHealth: stats.systemHealth
+      }
+    }
+
+    // Convert to CSV format
+    const csvContent = [
+      ['Báo cáo Dashboard HR Management System'],
+      ['Thời gian tạo:', reportData.generatedAt],
+      [''],
+      ['THỐNG KÊ TỔNG QUAN'],
+      ['Tổng người dùng', stats.totalUsers],
+      ['Tổng ứng viên', stats.totalCandidates],
+      ['Tổng tin tuyển dụng', stats.totalJobPostings],
+      ['Tổng phỏng vấn', stats.totalInterviews],
+      ['Chờ phê duyệt', stats.pendingApprovals],
+      ['Tuyển dụng đang hoạt động', stats.activeRecruitments],
+      ['Đã tuyển thành công', stats.completedHires],
+      ['Tình trạng hệ thống (%)', stats.systemHealth],
+      [''],
+      ['HOẠT ĐỘNG GẦN ĐÂY'],
+      ['ID', 'Loại', 'Tiêu đề', 'Mô tả', 'Thời gian', 'Trạng thái']
+    ]
+
+    // Add activities
+    recentActivities.slice(0, 10).forEach(activity => {
+      csvContent.push([
+        activity.id,
+        activity.type,
+        activity.title,
+        activity.description,
+        new Date(activity.timestamp).toLocaleString('vi-VN'),
+        activity.status
+      ])
+    })
+
+    // Convert to CSV string
+    const csvString = csvContent.map(row => 
+      row.map(cell => `"${cell}"`).join(',')
+    ).join('\n')
+
+    // Create and download file
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `dashboard-report-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    
+    // Safe removal
+    if (link.parentNode) {
+      document.body.removeChild(link)
+    }
+
+    console.log('✅ CSV report exported successfully!')
+  }
+
+  const handleNavigateToCandidates = () => {
+    console.log('🔥 Navigating to candidates page...')
+    window.location.href = '/candidates'
+  }
+
+  const handleNavigateToJobPostings = () => {
+    console.log('🔥 Navigating to job postings page...')
+    window.location.href = '/job-postings'
+  }
+
+  const handleNavigateToInterviews = () => {
+    console.log('🔥 Navigating to interviews page...')
+    window.location.href = '/interviews'
+  }
+
+  const handleNavigateToReports = () => {
+    console.log('🔥 Navigating to reports page...')
+    window.location.href = '/reports'
+  }
+
+  const handleNavigateToSettings = () => {
+    console.log('🔥 Navigating to settings page...')
+    window.location.href = '/settings'
+  }
+
+  const handleNavigateToDataManagement = () => {
+    console.log('🔥 Navigating to data management page...')
+    window.location.href = '/data-management'
   }
 
   const adminModules = [
@@ -277,7 +480,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <ProtectedRoute>
+      <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
@@ -285,17 +489,23 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground">Tổng quan hệ thống quản lý nhân sự và tuyển dụng</p>
         </div>
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            console.log('🔥 Export button clicked')
+            handleExportReport()
+          }}>
             <Download className="h-4 w-4 mr-2" />
             Xuất báo cáo
           </Button>
-          <Button variant="outline" size="sm" onClick={loadDashboardData}>
+          <Button variant="outline" size="sm" onClick={() => {
+            console.log('🔥 Refresh button clicked')
+            loadDashboardData()
+          }}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Làm mới
           </Button>
           <Switch
-            checked={theme === 'dark'}
-            onCheckedChange={toggleTheme}
+            checked={false}
+            onCheckedChange={() => {}}
             className="ml-4"
           >
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -360,43 +570,49 @@ export default function AdminDashboard() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/candidates'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToCandidates}
             >
               <UserPlus className="h-6 w-6" />
               <span className="text-xs">Thêm ứng viên</span>
             </Button>
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/job-postings'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToJobPostings}
             >
               <FileText className="h-6 w-6" />
               <span className="text-xs">Tạo tin tuyển dụng</span>
             </Button>
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/interviews'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToInterviews}
             >
               <Calendar className="h-6 w-6" />
               <span className="text-xs">Lên lịch phỏng vấn</span>
             </Button>
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/reports'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToReports}
             >
               <BarChart3 className="h-6 w-6" />
               <span className="text-xs">Xem báo cáo</span>
             </Button>
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/settings'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToSettings}
             >
               <Settings className="h-6 w-6" />
               <span className="text-xs">Cấu hình hệ thống</span>
             </Button>
             <Button 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => window.location.href = '/data-management'}
+              className="h-20 flex flex-col items-center justify-center space-y-2 cursor-pointer"
+              style={{ pointerEvents: 'auto', zIndex: 10 }}
+              onClick={handleNavigateToDataManagement}
             >
               <Database className="h-6 w-6" />
               <span className="text-xs">Quản lý dữ liệu</span>
@@ -621,6 +837,7 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 }

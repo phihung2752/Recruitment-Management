@@ -18,6 +18,7 @@ builder.Services.AddHttpClient();
 // Add custom services
 builder.Services.AddScoped<GmailService>();
 builder.Services.AddScoped<CVCollectionService>();
+builder.Services.AddScoped<AICVAnalysisService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

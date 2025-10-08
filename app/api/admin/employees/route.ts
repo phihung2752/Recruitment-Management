@@ -1,4 +1,34 @@
+
+
+
 import { NextRequest, NextResponse } from 'next/server'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,8 +48,27 @@ export async function GET(request: NextRequest) {
       ...(status && { status })
     })
 
-    // For now, return mock data that matches the backend response structure
-    // This will be replaced with actual API call once SSL issues are resolved
+    // Try to fetch from backend
+    try {
+      const backendUrl = `http://localhost:5000/api/admin/employees?${queryParams.toString()}`
+      
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Successfully fetched employees from backend:', data)
+        return NextResponse.json(data)
+      }
+    } catch (backendError) {
+      console.log('Backend not available, using mock data:', backendError)
+    }
+
+    // Fallback to mock data
     const mockData = {
       employees: [
         {

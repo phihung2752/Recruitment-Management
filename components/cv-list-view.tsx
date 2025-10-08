@@ -80,7 +80,7 @@ export function CVListView({
                 {visibleColumns.includes('status') && (
                   <TableCell className="hidden sm:table-cell">
                     <Badge variant={
-                      cv.status === "Shortlisted" ? "success" :
+                      cv.status === "Shortlisted" ? "default" :
                       cv.status === "Reviewing" ? "default" :
                       cv.status === "Rejected" ? "destructive" :
                       "secondary"

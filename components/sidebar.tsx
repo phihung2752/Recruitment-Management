@@ -1,93 +1,220 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { BarChart, Calendar, FileText, LayoutDashboard, MessageSquare, Settings, Users, UserPlus, Layers, UserCog, MessageCircle, FileSignature, CalendarCheck2, Menu, FileSearch, X } from 'lucide-react'
+import { useState } from "react"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { useLanguage } from "@/contexts/language-context"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useAuth } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
+import { 
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  UserCheck,
+  FileText,
+  Calendar,
+  UserCog,
+  ClipboardList,
+  MessageCircle,
+  Calendar as CalendarIcon,
+  Mail,
+  BarChart3,
+  Palette,
+  Settings,
+  X,
+  Bell,
+  HelpCircle
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Employees", href: "/employees", icon: Users },
-  { name: "Job Postings", href: "/job-postings", icon: FileText },
-  { name: "Candidates", href: "/candidates", icon: UserPlus },
-  { name: "CV Management", href: "/cv-management", icon: FileSearch },
-  { name: "Interviews", href: "/interviews", icon: CalendarCheck2 },
-  { name: "User Management", href: "/user-management", icon: UserCog },
-  { name: "Recruitment Requests", href: "/recruitment-requests", icon: FileSignature },
-  { name: "Chat", href: "/chat", icon: MessageCircle },
-  { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Messages", href: "/messages", icon: MessageSquare },
-  { name: "Analytics", href: "/analytics", icon: BarChart },
-  { name: "Settings", href: "/settings", icon: Settings },
-]
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+  isMobile?: boolean
+}
 
-export default function Sidebar() {
-  const { t } = useLanguage()
-  const [isOpen, setIsOpen] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+export default function Sidebar({ isOpen = false, onClose, isMobile = false }: SidebarProps) {
+  const pathname = usePathname()
+  const { hasPermission, user, isAuthenticated } = useAuth()
+  
+  // Debug logs
+  console.log('Sidebar - User:', user)
+  console.log('Sidebar - IsAuthenticated:', isAuthenticated)
 
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const menuItems = [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      permission: "dashboard.view"
+    },
+    {
+      title: "Candidates",
+      href: "/candidates",
+      icon: UserCheck,
+      permission: "candidate.read"
+    },
+    {
+      title: "Interviews",
+      href: "/interviews",
+      icon: Calendar,
+      permission: "interview.read"
+    },
+    {
+      title: "CV Management",
+      href: "/cv-management",
+      icon: FileText,
+      permission: "candidate.read"
+    },
+    {
+      title: "Calendar",
+      href: "/calendar",
+      icon: CalendarIcon,
+      permission: "interview.read"
+    },
+    {
+      title: "Job Postings",
+      href: "/job-postings",
+      icon: Briefcase,
+      permission: "job.read"
+    },
+    {
+      title: "Reports",
+      href: "/reports",
+      icon: BarChart3,
+      permission: "report.read"
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
+      permission: "system.settings"
+    },
+    {
+      title: "Employees",
+      href: "/employees",
+      icon: Users,
+      permission: "employee.read"
+    },
+    {
+      title: "Analytics",
+      href: "/analytics",
+      icon: BarChart3,
+      permission: "analytics.view"
+    },
+    {
+      title: "Notifications",
+      href: "/notifications",
+      icon: Bell,
+      permission: null
+    },
+    {
+      title: "Help & Support",
+      href: "/help",
+      icon: HelpCircle,
+      permission: null
+    },
+    {
+      title: "User Management",
+      href: "/user-management",
+      icon: UserCog,
+      permission: "user.read"
+    },
+    {
+      title: "Chat",
+      href: "/chat",
+      icon: MessageCircle,
+      permission: null
+    },
+    {
+      title: "Messages",
+      href: "/messages",
+      icon: Mail,
+      permission: null
+    }
+  ]
 
-  if (!isMounted) {
-    return null
-  }
+  const filteredMenuItems = menuItems.filter(item => 
+    !item.permission || hasPermission(item.permission)
+  )
 
-  const SidebarContent = (
-    <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2 border-b px-6">
-        <Layers className="h-6 w-6" />
-        <span className="font-semibold">{t('HR System')}</span>
-      </div>
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              "dark:text-gray-300 dark:hover:bg-gray-800"
-            )}
-            onClick={() => setIsOpen(false)}
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="flex items-center justify-between p-4 border-b border-hr-border">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-hr-primary rounded-lg flex items-center justify-center">
+            <UserCog className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-bold text-hr-text-primary">
+            HR System
+          </span>
+        </div>
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="lg:hidden"
           >
-            <item.icon className="h-5 w-5" />
-            {t(item.name)}
-          </Link>
-        ))}
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+        {filteredMenuItems.map((item) => {
+          const Icon = item.icon
+          const isActive = pathname === item.href
+          
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={isMobile ? onClose : undefined}
+              className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                isActive
+                  ? "bg-hr-primary text-white"
+                  : "text-hr-text-secondary hover:bg-hr-bg-primary hover:text-hr-text-primary"
+              )}
+            >
+              <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+              <span className="truncate">{item.title}</span>
+            </Link>
+          )
+        })}
       </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-hr-border">
+        <div className="text-xs text-hr-text-secondary text-center">
+          HR Management System v1.0
+        </div>
+      </div>
     </div>
   )
 
-  return (
-    <>
-      {/* Mobile Trigger */}
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden fixed top-3 left-3 z-40"
-          >
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle Sidebar</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] p-0">
-          {SidebarContent}
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SidebarContent />
         </SheetContent>
       </Sheet>
+    )
+  }
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <div className="flex flex-col flex-grow border-r bg-background">
-          {SidebarContent}
-        </div>
+  return (
+    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-50">
+      <div className="flex flex-col flex-grow bg-hr-bg-secondary border-r border-hr-border">
+        <SidebarContent />
       </div>
-    </>
+    </div>
   )
 }

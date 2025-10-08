@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { login, loginWithGoogle } = useAuth()
+  const { login } = useAuth()
   const router = useRouter()
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -43,7 +43,8 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     try {
-      await loginWithGoogle()
+      // Mock Google login for now
+      throw new Error("Google login not implemented")
       toast({
         title: "Đăng nhập thành công",
         description: "Chào mừng bạn đến với HR Management System!",

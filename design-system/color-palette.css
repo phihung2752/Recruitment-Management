@@ -1,0 +1,301 @@
+/* ===== HR MANAGEMENT SYSTEM COLOR PALETTE ===== */
+/* Professional color scheme for HR Management System */
+
+/* ===== LIGHT THEME (DEFAULT) ===== */
+:root {
+  /* Primary Colors - Professional Blue */
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;  /* Main Primary */
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+
+  /* Secondary Colors - Professional Gray */
+  --secondary-50: #f8fafc;
+  --secondary-100: #f1f5f9;
+  --secondary-200: #e2e8f0;
+  --secondary-300: #cbd5e1;
+  --secondary-400: #94a3b8;
+  --secondary-500: #64748b;  /* Main Secondary */
+  --secondary-600: #475569;
+  --secondary-700: #334155;
+  --secondary-800: #1e293b;
+  --secondary-900: #0f172a;
+
+  /* Accent Colors - Success Green */
+  --accent-50: #f0fdf4;
+  --accent-100: #dcfce7;
+  --accent-200: #bbf7d0;
+  --accent-300: #86efac;
+  --accent-400: #4ade80;
+  --accent-500: #22c55e;  /* Main Accent */
+  --accent-600: #16a34a;
+  --accent-700: #15803d;
+  --accent-800: #166534;
+  --accent-900: #14532d;
+
+  /* Status Colors */
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-200: #bbf7d0;
+  --success-300: #86efac;
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+  --success-800: #166534;
+  --success-900: #14532d;
+
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-200: #fde68a;
+  --warning-300: #fcd34d;
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+  --warning-800: #92400e;
+  --warning-900: #78350f;
+
+  --danger-50: #fef2f2;
+  --danger-100: #fee2e2;
+  --danger-200: #fecaca;
+  --danger-300: #fca5a5;
+  --danger-400: #f87171;
+  --danger-500: #ef4444;
+  --danger-600: #dc2626;
+  --danger-700: #b91c1c;
+  --danger-800: #991b1b;
+  --danger-900: #7f1d1d;
+
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Text Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-inverse: #ffffff;
+  --text-muted: #94a3b8;
+
+  /* Border Colors */
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --border-focus: #3b82f6;
+
+  /* Shadow Colors */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* ===== DARK THEME ===== */
+/* Dark Mode - using data-theme attribute */
+[data-theme="dark"] {
+  /* Primary Colors - Slightly brighter for dark mode */
+  --primary-50: #1e3a8a;
+  --primary-100: #1e40af;
+  --primary-200: #1d4ed8;
+  --primary-300: #2563eb;
+  --primary-400: #3b82f6;
+  --primary-500: #60a5fa;  /* Main Primary - Brighter */
+  --primary-600: #93c5fd;
+  --primary-700: #bfdbfe;
+  --primary-800: #dbeafe;
+  --primary-900: #eff6ff;
+
+  /* Secondary Colors - Dark mode grays */
+  --secondary-50: #0f172a;
+  --secondary-100: #1e293b;
+  --secondary-200: #334155;
+  --secondary-300: #475569;
+  --secondary-400: #64748b;
+  --secondary-500: #94a3b8;  /* Main Secondary */
+  --secondary-600: #cbd5e1;
+  --secondary-700: #e2e8f0;
+  --secondary-800: #f1f5f9;
+  --secondary-900: #f8fafc;
+
+  /* Accent Colors - Success Green (adjusted for dark) */
+  --accent-50: #14532d;
+  --accent-100: #166534;
+  --accent-200: #15803d;
+  --accent-300: #16a34a;
+  --accent-400: #22c55e;
+  --accent-500: #4ade80;  /* Main Accent - Brighter */
+  --accent-600: #86efac;
+  --accent-700: #bbf7d0;
+  --accent-800: #dcfce7;
+  --accent-900: #f0fdf4;
+
+  /* Status Colors - Dark mode adjusted */
+  --success-50: #14532d;
+  --success-100: #166534;
+  --success-200: #15803d;
+  --success-300: #16a34a;
+  --success-400: #22c55e;
+  --success-500: #4ade80;
+  --success-600: #86efac;
+  --success-700: #bbf7d0;
+  --success-800: #dcfce7;
+  --success-900: #f0fdf4;
+
+  --warning-50: #78350f;
+  --warning-100: #92400e;
+  --warning-200: #b45309;
+  --warning-300: #d97706;
+  --warning-400: #f59e0b;
+  --warning-500: #fbbf24;
+  --warning-600: #fcd34d;
+  --warning-700: #fde68a;
+  --warning-800: #fef3c7;
+  --warning-900: #fffbeb;
+
+  --danger-50: #7f1d1d;
+  --danger-100: #991b1b;
+  --danger-200: #b91c1c;
+  --danger-300: #dc2626;
+  --danger-400: #ef4444;
+  --danger-500: #f87171;
+  --danger-600: #fca5a5;
+  --danger-700: #fecaca;
+  --danger-800: #fee2e2;
+  --danger-900: #fef2f2;
+
+  /* Background Colors - Dark mode */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-elevated: #1e293b;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Text Colors - Dark mode */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #0f172a;
+  --text-muted: #64748b;
+
+  /* Border Colors - Dark mode */
+  --border-primary: #334155;
+  --border-secondary: #475569;
+  --border-focus: #60a5fa;
+
+  /* Shadow Colors - Dark mode */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+}
+
+/* ===== HR-SPECIFIC COLOR CLASSES ===== */
+/* These classes use the CSS variables above for easy theming */
+
+/* Background Classes */
+.bg-hr-primary { background-color: var(--primary-500); }
+.bg-hr-secondary { background-color: var(--secondary-500); }
+.bg-hr-accent { background-color: var(--accent-500); }
+.bg-hr-success { background-color: var(--success-500); }
+.bg-hr-warning { background-color: var(--warning-500); }
+.bg-hr-danger { background-color: var(--danger-500); }
+
+.bg-hr-bg-primary { background-color: var(--bg-primary); }
+.bg-hr-bg-secondary { background-color: var(--bg-secondary); }
+.bg-hr-bg-tertiary { background-color: var(--bg-tertiary); }
+.bg-hr-bg-elevated { background-color: var(--bg-elevated); }
+
+/* Text Classes */
+.text-hr-primary { color: var(--primary-500); }
+.text-hr-secondary { color: var(--secondary-500); }
+.text-hr-accent { color: var(--accent-500); }
+.text-hr-success { color: var(--success-500); }
+.text-hr-warning { color: var(--warning-500); }
+.text-hr-danger { color: var(--danger-500); }
+
+.text-hr-text-primary { color: var(--text-primary); }
+.text-hr-text-secondary { color: var(--text-secondary); }
+.text-hr-text-tertiary { color: var(--text-tertiary); }
+.text-hr-text-inverse { color: var(--text-inverse); }
+.text-hr-text-muted { color: var(--text-muted); }
+
+/* Border Classes */
+.border-hr-primary { border-color: var(--primary-500); }
+.border-hr-secondary { border-color: var(--secondary-500); }
+.border-hr-accent { border-color: var(--accent-500); }
+.border-hr-success { border-color: var(--success-500); }
+.border-hr-warning { border-color: var(--warning-500); }
+.border-hr-danger { border-color: var(--danger-500); }
+
+.border-hr-border-primary { border-color: var(--border-primary); }
+.border-hr-border-secondary { border-color: var(--border-secondary); }
+.border-hr-border-focus { border-color: var(--border-focus); }
+
+/* Hover States */
+.hover\:bg-hr-primary:hover { background-color: var(--primary-600); }
+.hover\:bg-hr-secondary:hover { background-color: var(--secondary-600); }
+.hover\:bg-hr-accent:hover { background-color: var(--accent-600); }
+.hover\:bg-hr-success:hover { background-color: var(--success-600); }
+.hover\:bg-hr-warning:hover { background-color: var(--warning-600); }
+.hover\:bg-hr-danger:hover { background-color: var(--danger-600); }
+
+/* Focus States */
+.focus\:border-hr-focus:focus { border-color: var(--border-focus); }
+.focus\:ring-hr-focus:focus { --tw-ring-color: var(--border-focus); }
+
+/* Shadow Classes */
+.shadow-hr-sm { box-shadow: var(--shadow-sm); }
+.shadow-hr-md { box-shadow: var(--shadow-md); }
+.shadow-hr-lg { box-shadow: var(--shadow-lg); }
+.shadow-hr-xl { box-shadow: var(--shadow-xl); }
+
+/* Improved hover effects for dark mode */
+[data-theme="dark"] .hover\:bg-hr-bg-secondary\/50:hover {
+  background-color: rgba(45, 55, 72, 0.3);
+}
+
+[data-theme="dark"] .hover\:bg-blue-50:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .hover\:bg-purple-50:hover {
+  background-color: rgba(147, 51, 234, 0.1);
+}
+
+[data-theme="dark"] .hover\:bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme="dark"] .hover\:bg-gray-50:hover {
+  background-color: rgba(75, 85, 99, 0.1);
+}
+
+/* Smooth transitions for all hover effects */
+.hover\:bg-hr-bg-secondary\/50:hover {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.hover\:bg-blue-50:hover {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.hover\:bg-purple-50:hover {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.hover\:bg-red-50:hover {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.hover\:bg-gray-50:hover {
+  transition: background-color 0.2s ease-in-out;
+}

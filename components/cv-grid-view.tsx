@@ -92,7 +92,7 @@ export function CVGridView({
                 </div>
                 {cv.interviewStatus && (
                   <Badge variant={
-                    cv.interviewStatus === "Completed" ? "success" :
+                    cv.interviewStatus === "Completed" ? "default" :
                     cv.interviewStatus === "Scheduled" ? "default" :
                     cv.interviewStatus === "Cancelled" ? "destructive" :
                     "secondary"

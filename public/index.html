@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Management System - SQL Server</title>
+    <meta name="description" content="Hệ thống quản lý nhân sự với SQL Server">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            color: white;
+            font-size: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .feature {
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+        .feature h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .feature p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        .status {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            color: #166534;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 1rem;
+            }
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">🏢</div>
+            <h1>HR Management System</h1>
+            <p class="subtitle">Hệ thống quản lý nhân sự với SQL Server</p>
+            
+            <div class="status">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>SQL Server Database</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>Next.js Frontend</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>.NET Backend</span>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Bảo mật cao</h3>
+                    <p>JWT Authentication, BCrypt encryption, Role-based access control</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🗄️</div>
+                    <h3>SQL Server Database</h3>
+                    <p>Entity Framework Core, Migration tự động, Performance tối ưu</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👥</div>
+                    <h3>Quản lý người dùng</h3>
+                    <p>CRUD operations, Phân quyền chi tiết, User management</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Giao diện hiện đại</h3>
+                    <p>Next.js 14, Tailwind CSS, Responsive design</p>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <a href="/main" class="btn btn-primary">Mở ứng dụng chính</a>
+                <a href="/login-sqlserver" class="btn btn-secondary">Đăng nhập</a>
+                <a href="/sqlserver-simple-test" class="btn btn-secondary">Test Database</a>
+            </div>
+
+            <div class="footer">
+                <p>Phiên bản 1.0.0 | Powered by Next.js & SQL Server</p>
+                <p>© 2024 HR Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto redirect to main app after 3 seconds
+        setTimeout(() => {
+            if (window.location.pathname === '/') {
+                window.location.href = '/main';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
+

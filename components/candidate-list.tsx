@@ -55,7 +55,7 @@ export function CandidateList({ candidates, onSelectCandidate }: CandidateListPr
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium truncate">{candidate.name}</h3>
-                    <Badge variant={candidate.status === "passed" ? "success" : "secondary"}>
+                    <Badge variant={candidate.status === "passed" ? "default" : "secondary"}>
                       {candidate.status}
                     </Badge>
                   </div>

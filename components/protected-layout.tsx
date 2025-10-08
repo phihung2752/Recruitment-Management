@@ -18,22 +18,22 @@ export default function ProtectedLayout({
   requiredPermissions = [],
   requiredRoles = [],
 }: ProtectedLayoutProps) {
-  const { user, isLoading, isAuthenticated, checkPermission, checkRole } = useAuth()
+  const { user, loading, isAuthenticated, hasPermission, hasRole } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       // Store the intended URL to redirect back after login
       sessionStorage.setItem("redirectAfterLogin", pathname)
       router.push("/login")
       return
     }
 
-    if (!isLoading && isAuthenticated && user) {
+    if (!loading && isAuthenticated && user) {
       // Check permissions if specified
       if (requiredPermissions.length > 0) {
-        const hasAllPermissions = requiredPermissions.every((permission) => checkPermission(permission))
+        const hasAllPermissions = requiredPermissions.every((permission) => hasPermission(permission))
 
         if (!hasAllPermissions) {
           router.push("/unauthorized")
@@ -43,7 +43,7 @@ export default function ProtectedLayout({
 
       // Check roles if specified
       if (requiredRoles.length > 0) {
-        const hasRequiredRole = checkRole(requiredRoles)
+        const hasRequiredRole = requiredRoles.some((role) => hasRole(role))
 
         if (!hasRequiredRole) {
           router.push("/unauthorized")
@@ -52,18 +52,18 @@ export default function ProtectedLayout({
       }
     }
   }, [
-    isLoading,
+    loading,
     isAuthenticated,
     user,
     router,
     pathname,
     requiredPermissions,
     requiredRoles,
-    checkPermission,
-    checkRole,
+    hasPermission,
+    hasRole,
   ])
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

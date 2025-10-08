@@ -27,6 +27,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import { useAuth } from "@/contexts/auth-context"
 import * as XLSX from "xlsx"
 import { toast } from "@/hooks/use-toast"
 

@@ -40,7 +40,7 @@ export const apiClient = {
     }
 
     if (token) {
-      headers["Authorization"] = `Bearer ${token}`
+      (headers as any)["Authorization"] = `Bearer ${token}`
     }
 
     const config: RequestInit = {

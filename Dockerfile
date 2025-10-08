@@ -1,43 +1,56 @@
-# Use the official .NET 8 SDK image for building
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+# Use Node.js 18 Alpine as base image
+FROM node:18-alpine AS base
 
-# Copy csproj and restore dependencies
-COPY ["HRManagement.API/HRManagement.API.csproj", "HRManagement.API/"]
-RUN dotnet restore "HRManagement.API/HRManagement.API.csproj"
-
-# Copy everything else and build
-COPY . .
-WORKDIR "/src/HRManagement.API"
-RUN dotnet build "HRManagement.API.csproj" -c Release -o /app/build
-
-# Publish the application
-FROM build AS publish
-RUN dotnet publish "HRManagement.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-# Use the official .NET 8 runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
 
-# Copy the published application
-COPY --from=publish /app/publish .
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
-# Create directories for uploads and logs
-RUN mkdir -p /app/uploads /app/logs
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Set environment variables
-ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:8080
+RUN npm run build
 
-# Expose port
-EXPOSE 8080
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/health || exit 1
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Set the entry point
-ENTRYPOINT ["dotnet", "HRManagement.API.dll"]
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "server.js"]

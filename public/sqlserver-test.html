@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test SQL Server - HR Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 SQL Server Test Page</h1>
+        <p>Trang này để test kết nối SQL Server và backend API.</p>
+        
+        <div class="test-section info">
+            <h3>📊 Trạng thái hệ thống:</h3>
+            <ul>
+                <li>SQL Server: Đang chạy trên port 1433</li>
+                <li>Database: HRManagementSystem</li>
+                <li>Backend API: http://localhost:5000</li>
+                <li>Frontend: http://localhost:3000</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Test Backend API</h3>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <button onclick="testLogin()">Test Login API</button>
+            <div id="backend-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🗄️ Test Database Connection</h3>
+            <button onclick="testDatabase()">Test Database via API</button>
+            <div id="database-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>👤 Test Admin User</h3>
+            <button onclick="testAdminUser()">Test Admin User Login</button>
+            <div id="admin-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Logs</h3>
+            <pre id="logs"></pre>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function testBackend() {
+            const result = document.getElementById('backend-result');
+            result.innerHTML = '<p>Đang test...</p>';
+            log('🔍 Testing backend connection...');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/Auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'test', password: 'test' })
+                });
+                
+                if (response.ok) {
+                    result.innerHTML = '<div class="success">✅ Backend API đang chạy!</div>';
+                    log('✅ Backend API is running');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Backend API có lỗi: ' + response.status + '</div>';
+                    log('❌ Backend API error: ' + response.status);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Không thể kết nối đến Backend API: ' + error.message + '</div>';
+                log('❌ Backend connection failed: ' + error.message);
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('backend-result');
+            log('🔍 Testing login API...');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/Auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'admin', password: '123456' })
+                });
+                
+                const data = await response.json();
+                log('📊 Login response: ' + JSON.stringify(data));
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="success">✅ Login thành công! Token: ' + data.token.substring(0, 20) + '...</div>';
+                    log('✅ Login successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Login thất bại: ' + data.message + '</div>';
+                    log('❌ Login failed: ' + data.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi kết nối: ' + error.message + '</div>';
+                log('❌ Connection error: ' + error.message);
+            }
+        }
+
+        async function testDatabase() {
+            const result = document.getElementById('database-result');
+            result.innerHTML = '<p>Đang test database...</p>';
+            log('🔍 Testing database connection...');
+            
+            try {
+                // Test via frontend API
+                const response = await fetch('/api/test-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'admin', password: '123456' })
+                });
+                
+                const data = await response.json();
+                log('📊 Database test response: ' + JSON.stringify(data));
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="success">✅ Database kết nối thành công!</div>';
+                    log('✅ Database connection successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Database lỗi: ' + data.message + '</div>';
+                    log('❌ Database error: ' + data.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi kết nối database: ' + error.message + '</div>';
+                log('❌ Database connection error: ' + error.message);
+            }
+        }
+
+        async function testAdminUser() {
+            const result = document.getElementById('admin-result');
+            result.innerHTML = '<p>Đang test admin user...</p>';
+            log('🔍 Testing admin user...');
+            
+            try {
+                const response = await fetch('/api/test-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'admin', password: '123456' })
+                });
+                
+                const data = await response.json();
+                log('📊 Admin user test: ' + JSON.stringify(data));
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="success">✅ Admin user hoạt động bình thường!</div>';
+                    log('✅ Admin user is working');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Admin user lỗi: ' + data.message + '</div>';
+                    log('❌ Admin user error: ' + data.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi test admin user: ' + error.message + '</div>';
+                log('❌ Admin user test error: ' + error.message);
+            }
+        }
+
+        // Auto test on page load
+        window.onload = function() {
+            log('🚀 SQL Server Test Page loaded');
+            log('🔧 Starting automatic tests...');
+            setTimeout(testBackend, 1000);
+            setTimeout(testDatabase, 2000);
+            setTimeout(testAdminUser, 3000);
+        };
+    </script>
+</body>
+</html>
+

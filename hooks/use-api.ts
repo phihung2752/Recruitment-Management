@@ -31,7 +31,7 @@ export function useApi<T>(apiCall: () => Promise<T>, dependencies: any[] = []): 
       setError(apiError)
 
       // Show error toast for critical errors
-      if (apiError.status === 0 || apiError.status >= 500) {
+      if (apiError.status === 0 || (apiError.status && apiError.status >= 500)) {
         toast({
           title: "Lỗi kết nối",
           description: apiError.message,

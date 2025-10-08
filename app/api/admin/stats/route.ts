@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     // Try to fetch real data from backend
     try {
-      const backendResponse = await fetch('https://localhost:7001/api/admin/stats', {
+      const backendResponse = await fetch('http://localhost:5000/api/admin/stats', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(realData)
       }
     } catch (backendError) {
-      console.log('Backend not available, using mock data:', backendError.message)
+      console.log('Backend not available, using mock data:', backendError instanceof Error ? backendError.message : 'Unknown error')
     }
 
     // Fallback to mock data with Vietnamese sample data

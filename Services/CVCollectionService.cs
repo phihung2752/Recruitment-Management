@@ -48,7 +48,7 @@ namespace HRManagementSystem.Services
             return collectedCVs;
         }
 
-        public async Task<CVAnalysisResult> AnalyzeCVWithAIAsync(string cvContent, string candidateName)
+        public async Task<CVAnalysisResultOld> AnalyzeCVWithAIAsync(string cvContent, string candidateName)
         {
             try
             {
@@ -124,7 +124,7 @@ namespace HRManagementSystem.Services
             }
         }
 
-        public async Task<string> ClassifyCandidateAsync(CVAnalysisResult analysis)
+        public async Task<string> ClassifyCandidateAsync(CVAnalysisResultOld analysis)
         {
             try
             {
@@ -235,14 +235,14 @@ namespace HRManagementSystem.Services
             return mockCVs;
         }
 
-        private CVAnalysisResult ParseAIAnalysis(string analysisText)
+        private CVAnalysisResultOld ParseAIAnalysis(string analysisText)
         {
             try
             {
                 // Try to parse JSON response
                 var analysis = JsonSerializer.Deserialize<JsonElement>(analysisText);
                 
-                return new CVAnalysisResult
+                return new CVAnalysisResultOld
                 {
                     TechnicalSkillsScore = analysis.TryGetProperty("technicalSkillsScore", out var tech) ? tech.GetInt32() : 75,
                     ExperienceLevel = analysis.TryGetProperty("experienceLevel", out var exp) ? exp.GetString() ?? "Mid" : "Mid",
@@ -266,9 +266,9 @@ namespace HRManagementSystem.Services
             }
         }
 
-        private CVAnalysisResult GenerateFallbackAnalysis(string cvContent, string candidateName)
+        private CVAnalysisResultOld GenerateFallbackAnalysis(string cvContent, string candidateName)
         {
-            return new CVAnalysisResult
+            return new CVAnalysisResultOld
             {
                 TechnicalSkillsScore = 75,
                 ExperienceLevel = "Mid",
@@ -299,7 +299,7 @@ namespace HRManagementSystem.Services
         public string FilePath { get; set; } = "";
     }
 
-    public class CVAnalysisResult
+    public class CVAnalysisResultOld
     {
         public int TechnicalSkillsScore { get; set; }
         public string ExperienceLevel { get; set; } = "";

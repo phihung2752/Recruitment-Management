@@ -123,7 +123,7 @@ const sendMessage = () => {
       timestamp: new Date(),
       read: false,
       readBy: [currentUser.name],
-      replyTo: replyingTo,
+      replyTo: replyingTo || undefined,
       reactions: {},
       threadId: replyingTo || (editingMessage ? messages.find(m => m.id === editingMessage)?.threadId : undefined),
       isThreadStarter: !replyingTo && !editingMessage
@@ -149,7 +149,7 @@ const sendMessage = () => {
     if (message.threadId) {
       setThreads(prevThreads => ({
         ...prevThreads,
-        [message.threadId]: [...(prevThreads[message.threadId] || []), message]
+        [message.threadId as string]: [...(prevThreads[message.threadId as string] || []), message]
       }))
     } else if (message.isThreadStarter) {
       setThreads(prevThreads => ({
@@ -172,7 +172,7 @@ const handleSearch = () => {
   // Update UI to show filtered messages
   toast({
     title: t("Search Results"),
-    description: t("Found {{count}} messages containing \"{{term}}\"", { count: filteredMessages.length, term: searchTerm }),
+    description: `Found ${filteredMessages.length} messages containing "${searchTerm}"`,
   })
 }
 
@@ -188,7 +188,7 @@ const handleCreateGroup = () => {
     // Implement group creation logic
     toast({
       title: t("Group Created"),
-      description: t("Group \"{{name}}\" has been created.", { name: groupName }),
+      description: `Group "${groupName}" has been created.`,
     })
     setGroupName("")
     setShowCreateGroup(false)

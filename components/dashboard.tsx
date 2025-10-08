@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InteractiveAttendanceChart } from "@/components/interactive-attendance-chart"
 import { RecruitmentDashboard } from "@/components/recruitment-dashboard"
 import { NotificationBadge } from "@/components/notification-badge"
-import { useTheme } from "@/contexts/theme-context"
+// import { useTheme } from "@/contexts/theme-context"
 import { Search, Plus, X, Bell, Sun, Moon, Download } from 'lucide-react'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DatePickerWithRange } from "@/components/date-range-picker"
@@ -60,7 +60,9 @@ export function Dashboard() {
     from: new Date(),
     to: addDays(new Date(), 7),
   })
-  const { theme, toggleTheme } = useTheme()
+  // const { theme, toggleTheme } = useTheme()
+  const theme = 'light' // Default theme
+  const toggleTheme = () => {} // Placeholder function
 
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -107,7 +109,7 @@ export function Dashboard() {
         <div className="flex items-center space-x-4">
           <NotificationBadge />
           <Switch
-            checked={theme === 'dark'}
+            checked={false}
             onCheckedChange={toggleTheme}
             className="ml-4"
           >

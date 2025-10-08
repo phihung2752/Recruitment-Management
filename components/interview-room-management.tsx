@@ -84,8 +84,8 @@ export function InterviewRoomManagement() {
               <CardTitle className="text-lg font-medium">{room.name}</CardTitle>
               <Badge 
                 variant={
-                  room.status === "available" ? "success" :
-                  room.status === "occupied" ? "warning" :
+                  room.status === "available" ? "default" :
+                  room.status === "occupied" ? "secondary" :
                   "destructive"
                 }
               >

@@ -79,7 +79,20 @@ export function CandidateInterviewTracking({
         <CardContent className="p-3 sm:p-4 lg:p-6">
           <ScrollArea className="w-full">
             <div className="min-w-[300px] sm:min-w-[600px]">
-              <InterviewTrackingTree candidate={candidate} interviewRounds={interviewRounds} />
+              <InterviewTrackingTree 
+                candidate={{
+                  ...candidate,
+                  id: parseInt(candidate.id) || 0,
+                  firstName: candidate.name?.split(' ')[0] || '',
+                  lastName: candidate.name?.split(' ').slice(1).join(' ') || ''
+                }} 
+                interviewRounds={interviewRounds.map(round => ({
+                  ...round,
+                  id: parseInt(round.id) || 0,
+                  status: (round as any).status || 'pending',
+                  interviewer: (round as any).interviewer || 'TBD'
+                }))} 
+              />
             </div>
           </ScrollArea>
         </CardContent>

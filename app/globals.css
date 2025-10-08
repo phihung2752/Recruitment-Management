@@ -1,6 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import HR Management Color Palette */
+@import url('../design-system/color-palette.css');
  
 @layer base {
   :root {

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Server Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .login-form {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 SQL Server Simple Test</h1>
+        <p>Trang test đơn giản để kiểm tra SQL Server và tạo admin user mới.</p>
+        
+        <div class="test-section info">
+            <h3>📊 Trạng thái hệ thống:</h3>
+            <ul>
+                <li>SQL Server: Đang chạy trên port 1433</li>
+                <li>Database: HRManagementSystem</li>
+                <li>Frontend: http://localhost:3000</li>
+                <li>Backend: Đang cấu hình</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Test SQL Server Connection</h3>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connection-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>👤 Create New Admin User</h3>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" value="admin">
+                <input type="password" id="password" placeholder="Password" value="123456">
+                <button onclick="createAdminUser()">Create Admin User</button>
+            </div>
+            <div id="create-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Test Login</h3>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="login-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Logs</h3>
+            <pre id="logs"></pre>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function testConnection() {
+            const result = document.getElementById('connection-result');
+            result.innerHTML = '<p>Đang test kết nối...</p>';
+            log('🔍 Testing SQL Server connection...');
+            
+            try {
+                const response = await fetch('/api/sqlserver-test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="success">✅ Kết nối SQL Server thành công!<br>Users: ' + data.userCount + '<br>Admin: ' + data.adminUser.Username + '</div>';
+                    log('✅ SQL Server connection successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Lỗi kết nối: ' + data.message + '</div>';
+                    log('❌ SQL Server connection failed: ' + data.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi: ' + error.message + '</div>';
+                log('❌ Error: ' + error.message);
+            }
+        }
+
+        async function createAdminUser() {
+            const result = document.getElementById('create-result');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            result.innerHTML = '<p>Đang tạo admin user...</p>';
+            log('🔍 Creating admin user...');
+            
+            try {
+                // Generate password hash
+                const hashResponse = await fetch('/api/generate-hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const hashData = await hashResponse.json();
+                
+                if (hashData.success) {
+                    // Create user in database
+                    const createResponse = await fetch('/api/create-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            username, 
+                            password: password,
+                            passwordHash: hashData.hash 
+                        })
+                    });
+                    
+                    const createData = await createResponse.json();
+                    
+                    if (createData.success) {
+                        result.innerHTML = '<div class="success">✅ Admin user đã được tạo thành công!</div>';
+                        log('✅ Admin user created successfully');
+                    } else {
+                        result.innerHTML = '<div class="error">❌ Lỗi tạo user: ' + createData.message + '</div>';
+                        log('❌ Error creating user: ' + createData.message);
+                    }
+                } else {
+                    result.innerHTML = '<div class="error">❌ Lỗi tạo hash: ' + hashData.message + '</div>';
+                    log('❌ Error generating hash: ' + hashData.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi: ' + error.message + '</div>';
+                log('❌ Error: ' + error.message);
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            result.innerHTML = '<p>Đang test login...</p>';
+            log('🔍 Testing login...');
+            
+            try {
+                const response = await fetch('/api/sqlserver-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="success">✅ Login thành công!<br>User: ' + data.user.username + '<br>Status: ' + data.user.status + '</div>';
+                    log('✅ Login successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Login thất bại: ' + data.message + '</div>';
+                    log('❌ Login failed: ' + data.message);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Lỗi: ' + error.message + '</div>';
+                log('❌ Error: ' + error.message);
+            }
+        }
+
+        // Auto test on page load
+        window.onload = function() {
+            log('🚀 SQL Server Simple Test Page loaded');
+            log('🔧 Starting automatic tests...');
+            setTimeout(testConnection, 1000);
+        };
+    </script>
+</body>
+</html>
+

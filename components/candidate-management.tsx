@@ -332,7 +332,7 @@ export default function CandidateManagement() {
                       <TableCell>{candidate.name}</TableCell>
                       <TableCell>{candidate.position}</TableCell>
                       <TableCell>
-                        <Badge variant={candidate.status === "Hired" ? "success" : candidate.status === "Rejected" ? "destructive" : "default"}>
+                        <Badge variant={candidate.status === "Hired" ? "default" : candidate.status === "Rejected" ? "destructive" : "secondary"}>
                           {candidate.status}
                         </Badge>
                       </TableCell>
@@ -529,7 +529,7 @@ export default function CandidateManagement() {
                     </div>
                     <div>
                       <Label>{t("Status")}</Label>
-                      <Badge variant={candidate.status === "Hired" ? "success" : candidate.status === "Rejected" ? "destructive" : "default"}>
+                      <Badge variant={candidate.status === "Hired" ? "default" : candidate.status === "Rejected" ? "destructive" : "secondary"}>
                         {t(candidate.status)}
                       </Badge>
                     </div>

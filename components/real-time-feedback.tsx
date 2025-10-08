@@ -139,9 +139,9 @@ export function RealTimeFeedback() {
                   <span className="font-medium">{item.interviewer}</span>
                   <Badge
                     variant={
-                      item.type === "positive" ? "success" :
+                      item.type === "positive" ? "default" :
                       item.type === "negative" ? "destructive" :
-                      "default"
+                      "secondary"
                     }
                   >
                     {item.type}

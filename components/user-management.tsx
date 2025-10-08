@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import * as XLSX from "xlsx"
 import { useToast } from "@/components/ui/use-toast"
-import { useTranslation } from "i18next"
+// import { useTranslation } from "i18next"
 
 interface User {
   id: string
@@ -22,7 +22,8 @@ interface User {
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([])
   const { toast } = useToast()
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
+  const t = (key: string) => key // Mock translation function
 
   useEffect(() => {
     // Replace with your actual data fetching logic

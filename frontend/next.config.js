@@ -1,17 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "https://localhost:7001/api",
+    API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:5000',
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.API_BASE_URL || 'http://localhost:5000'}/api/:path*`,
+      },
+    ];
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

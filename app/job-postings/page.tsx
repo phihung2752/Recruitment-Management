@@ -1,47 +1,97 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { FileText, Plus, Search, Filter, MapPin, Clock, DollarSign } from "lucide-react"
-import { useLanguage } from "@/contexts/language-context"
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/auth-context'
+import ProtectedRoute from '@/components/protected-route'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Plus, Edit, Trash2, Eye, Calendar, MapPin, Briefcase, Users } from 'lucide-react'
+
+interface JobPosting {
+  id: string
+  title: string
+  description: string
+  requirements: string
+  location: string
+  workType: string
+  employmentType: string
+  experienceLevel: string
+  status: string
+  publishedAt: string | null
+  applicationDeadline: string | null
+  numberOfPositions: number
+  applicationsCount: number
+  viewsCount: number
+  hiredCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+interface JobStats {
+  totalJobs: number
+  activeJobs: number
+  draftJobs: number
+  totalApplications: number
+  totalViews: number
+  hireRate: number
+}
 
 export default function JobPostingsPage() {
-  const { t } = useLanguage()
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [jobPostings, setJobPostings] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    applications: 0,
-    locations: 0
+  const { user, isAuthenticated } = useAuth()
+  const [jobs, setJobs] = useState<JobPosting[]>([])
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([])
+  const [filteredJobs, setFilteredJobs] = useState<JobPosting[]>([])
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 })
+  const [stats, setStats] = useState<JobStats>({
+    totalJobs: 0,
+    activeJobs: 0,
+    draftJobs: 0,
+    totalApplications: 0,
+    totalViews: 0,
+    hireRate: 0
   })
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("All")
+  const [departmentFilter, setDepartmentFilter] = useState("All")
+  const [experienceFilter, setExperienceFilter] = useState("All")
+  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
-  // Fetch job postings data
+  // Fetch real data from API
   useEffect(() => {
     const fetchJobPostings = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/admin/jobpostings')
+        const token = localStorage.getItem('token')
+        const response = await fetch('/api/job-postings', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
         if (response.ok) {
           const data = await response.json()
           setJobPostings(data.jobPostings || [])
-          setStats({
-            total: data.totalCount || 0,
-            active: data.jobPostings?.filter((job: any) => job.status === 'Active').length || 0,
-            applications: data.jobPostings?.reduce((sum: number, job: any) => sum + (job.applicationsCount || 0), 0) || 0,
-            locations: new Set(data.jobPostings?.map((job: any) => job.location)).size || 0
-          })
+          setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 })
+        } else {
+          console.error('Failed to fetch job postings:', response.statusText)
+          setJobPostings([])
         }
       } catch (error) {
         console.error('Error fetching job postings:', error)
+        setJobPostings([])
       } finally {
         setLoading(false)
       }
@@ -50,233 +100,325 @@ export default function JobPostingsPage() {
     fetchJobPostings()
   }, [])
 
+  const loadJobPostings = async () => {
+    try {
+      setLoading(true)
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Use real data from API
+      const response = await fetch('/api/job-postings', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setJobs(data.jobPostings || [])
+        setJobPostings(data.jobPostings || [])
+        setFilteredJobs(data.jobPostings || [])
+        setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 })
+        
+        // Calculate stats
+        const jobPostings = data.jobPostings || []
+        const totalJobs = jobPostings.length
+        const activeJobs = jobPostings.filter((job: JobPosting) => job.status === 'Active').length
+        const draftJobs = jobPostings.filter((job: JobPosting) => job.status === 'Draft').length
+        const totalApplications = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.applicationsCount, 0)
+        const totalViews = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.viewsCount, 0)
+        const hiredCount = jobPostings.reduce((sum: number, job: JobPosting) => sum + job.hiredCount, 0)
+        const hireRate = totalApplications > 0 ? (hiredCount / totalApplications) * 100 : 0
+      
+        setStats({
+          totalJobs,
+          activeJobs,
+          draftJobs,
+          totalApplications,
+          totalViews,
+          hireRate
+        })
+      } else {
+        console.error('Failed to fetch job postings:', response.statusText)
+        setJobs([])
+        setJobPostings([])
+        setFilteredJobs([])
+      }
+    } catch (error) {
+      console.error('Error loading job postings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Active': return 'bg-green-100 text-green-800'
+      case 'Draft': return 'bg-yellow-100 text-yellow-800'
+      case 'Closed': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'Active': return 'Active'
+      case 'Draft': return 'Draft'
+      case 'Closed': return 'Closed'
+      default: return status
+    }
+  }
+
+  const getExperienceText = (level: string) => {
+    switch (level) {
+      case 'Entry': return 'Entry Level'
+      case 'Mid': return 'Mid Level'
+      case 'Senior': return 'Senior Level'
+      case 'Lead': return 'Lead Level'
+      default: return level
+    }
+  }
+
+  const getEmploymentTypeText = (type: string) => {
+    switch (type) {
+      case 'Permanent': return 'Permanent'
+      case 'Contract': return 'Contract'
+      case 'Internship': return 'Internship'
+      default: return type
+    }
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleJobAction = (action: string, jobId: string) => {
+    console.log(`${action} job ${jobId}`)
+  }
+
+  if (!isAuthenticated) {
+    return <div>Please log in to view job postings.</div>
+  }
+
   return (
-    <div className="space-y-4 p-4">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold">{t("Job Postings")}</h1>
-          <p className="text-muted-foreground">{t("Create and manage job postings")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                {t("Create Job Posting")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{t("Create New Job Posting")}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title">{t("Job Title")}</Label>
-                    <Input id="title" placeholder={t("e.g. Senior Software Engineer")} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="department">{t("Department")}</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select department")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="engineering">{t("Engineering")}</SelectItem>
-                        <SelectItem value="product">{t("Product")}</SelectItem>
-                        <SelectItem value="design">{t("Design")}</SelectItem>
-                        <SelectItem value="marketing">{t("Marketing")}</SelectItem>
-                        <SelectItem value="sales">{t("Sales")}</SelectItem>
-                        <SelectItem value="hr">{t("HR")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="location">{t("Location")}</Label>
-                    <Input id="location" placeholder={t("e.g. Ho Chi Minh City")} />
-                  </div>
-                  <div>
-                    <Label htmlFor="employmentType">{t("Employment Type")}</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select type")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="full-time">{t("Full-time")}</SelectItem>
-                        <SelectItem value="part-time">{t("Part-time")}</SelectItem>
-                        <SelectItem value="contract">{t("Contract")}</SelectItem>
-                        <SelectItem value="intern">{t("Intern")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="experience">{t("Experience Level")}</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select level")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="entry">{t("Entry Level")}</SelectItem>
-                        <SelectItem value="mid">{t("Mid Level")}</SelectItem>
-                        <SelectItem value="senior">{t("Senior Level")}</SelectItem>
-                        <SelectItem value="lead">{t("Lead Level")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="salaryMin">{t("Minimum Salary")}</Label>
-                    <Input id="salaryMin" type="number" placeholder="15000000" />
-                  </div>
-                  <div>
-                    <Label htmlFor="salaryMax">{t("Maximum Salary")}</Label>
-                    <Input id="salaryMax" type="number" placeholder="25000000" />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description">{t("Job Description")}</Label>
-                  <Textarea 
-                    id="description" 
-                    placeholder={t("Describe the role, responsibilities, and requirements...")}
-                    className="min-h-[200px]"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="requirements">{t("Requirements")}</Label>
-                  <Textarea 
-                    id="requirements" 
-                    placeholder={t("List the required skills, qualifications, and experience...")}
-                    className="min-h-[150px]"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="benefits">{t("Benefits & Perks")}</Label>
-                  <Textarea 
-                    id="benefits" 
-                    placeholder={t("List the benefits and perks offered...")}
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="applicationDeadline">{t("Application Deadline")}</Label>
-                    <Input id="applicationDeadline" type="date" />
-                  </div>
-                  <div>
-                    <Label htmlFor="startDate">{t("Expected Start Date")}</Label>
-                    <Input id="startDate" type="date" />
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  {t("Cancel")}
-                </Button>
-                <Button onClick={() => setIsCreateDialogOpen(false)}>
-                  {t("Create Job Posting")}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("Total Postings")}</p>
-                <p className="text-xl font-bold">{loading ? "..." : stats.total}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p4">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("Active")}</p>
-                <p className="text-xl font-bold">{loading ? "..." : stats.active}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("Applications")}</p>
-                <p className="text-xl font-bold">{loading ? "..." : stats.applications}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">{t("Locations")}</p>
-                <p className="text-xl font-bold">{loading ? "..." : stats.locations}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("Search job postings...")}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" />
-              {t("Filters")}
-            </Button>
+    <ProtectedRoute requiredPermissions={['job.read']}>
+      <div className="p-6 space-y-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-hr-text-primary">Job Postings</h1>
+            <p className="text-hr-text-secondary">Create and manage job postings.</p>
           </div>
-        </CardContent>
-      </Card>
+          <Button 
+            className="bg-hr-primary text-white hover:bg-hr-primary/90"
+            onClick={() => setShowCreateDialog(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Job Posting
+          </Button>
+        </div>
 
-      {/* Job Postings List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("Job Postings")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t("No job postings yet")}</h3>
-            <p className="text-muted-foreground mb-4">
-              {t("Start by creating your first job posting to attract candidates.")}
-            </p>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("Create First Job Posting")}
-            </Button>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-hr-bg-secondary border-hr-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-hr-text-secondary">Total Jobs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-hr-text-primary">{stats.totalJobs}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-hr-bg-secondary border-hr-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-hr-text-secondary">Active Jobs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.activeJobs}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-hr-bg-secondary border-hr-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-hr-text-secondary">Total Applications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-hr-text-primary">{stats.totalApplications}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-hr-bg-secondary border-hr-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-hr-text-secondary">Hire Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-hr-text-primary">{stats.hireRate.toFixed(1)}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Search job postings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-48 bg-hr-bg-secondary border-hr-border">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Status</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Draft">Draft</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Job Postings List */}
+        <div className="grid gap-4">
+          {loading ? (
+            <div className="text-center py-8 text-hr-text-secondary">Loading...</div>
+          ) : filteredJobs.length === 0 ? (
+            <div className="text-center py-8 text-hr-text-secondary">No job postings found.</div>
+          ) : (
+            filteredJobs.map((job) => (
+              <Card key={job.id} className="hover:shadow-md transition-shadow bg-hr-bg-secondary border-hr-border">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-hr-text-primary">{job.title}</CardTitle>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-hr-text-secondary">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {job.location}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-4 w-4" />
+                          {job.workType}
+                        </span>
+                        <span>•</span>
+                        <span>{getEmploymentTypeText(job.employmentType)}</span>
+                        <span>•</span>
+                        <span>{getExperienceText(job.experienceLevel)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className={getStatusColor(job.status)}>
+                          {getStatusText(job.status)}
+                        </Badge>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => setSelectedJob(job)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleJobAction('edit', job.id)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleJobAction('delete', job.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-hr-text-secondary mb-4">{job.description}</p>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-hr-text-primary">Requirements:</h4>
+                    <p className="text-sm text-hr-text-secondary">{job.requirements}</p>
+                  </div>
+                  {job.applicationDeadline && (
+                    <div className="mt-4 text-sm text-hr-text-secondary flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Application deadline: {new Date(job.applicationDeadline).toLocaleDateString()}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-4 mt-4 text-sm text-hr-text-secondary">
+                    <span className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {job.applicationsCount} applications
+                    </span>
+                    <span>{job.viewsCount} views</span>
+                    <span>{job.hiredCount} hired</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Create Job Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Job Posting</DialogTitle>
+              <DialogDescription>
+                Fill in the details to create a new job posting.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Job Title</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g. Senior Software Engineer"
+                  className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe the role and responsibilities..."
+                  rows={3}
+                  className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                />
+              </div>
+              <div>
+                <Label htmlFor="requirements">Requirements</Label>
+                <Textarea
+                  id="requirements"
+                  placeholder="List the required skills and qualifications..."
+                  rows={3}
+                  className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    placeholder="e.g. Ho Chi Minh City"
+                    className="bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workType">Work Type</Label>
+                  <Select>
+                    <SelectTrigger className="bg-hr-bg-secondary border-hr-border">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Full-time">Full-time</SelectItem>
+                      <SelectItem value="Part-time">Part-time</SelectItem>
+                      <SelectItem value="Contract">Contract</SelectItem>
+                      <SelectItem value="Remote">Remote</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button className="bg-hr-primary text-white hover:bg-hr-primary/90">Create Job Posting</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </ProtectedRoute>
   )
 }

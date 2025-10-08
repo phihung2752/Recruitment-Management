@@ -57,7 +57,7 @@ namespace HRManagementSystem.Controllers
         }
 
         [HttpPost("classify-candidate")]
-        public async Task<IActionResult> ClassifyCandidate([FromBody] CVAnalysisResult analysis)
+        public async Task<IActionResult> ClassifyCandidate([FromBody] CVAnalysisResultOld analysis)
         {
             try
             {

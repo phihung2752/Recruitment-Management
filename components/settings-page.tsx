@@ -13,12 +13,14 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
 import { useLanguage } from "@/contexts/language-context"
-import { useTheme } from "@/contexts/theme-context"
+// import { useTheme } from "@/contexts/theme-context"
 import { Save, Bell, Shield, Database, Mail, Palette, Building } from "lucide-react"
 
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage()
-  const { theme, toggleTheme } = useTheme()
+  // const { theme, toggleTheme } = useTheme()
+  const theme = 'light' // Default theme
+  const toggleTheme = () => {} // Placeholder function
 
   const [companySettings, setCompanySettings] = useState({
     name: "HR Management Company",
@@ -74,7 +76,7 @@ export default function SettingsPage() {
   const handleSaveSettings = (section: string) => {
     toast({
       title: t("Settings Saved"),
-      description: t("{{section}} settings have been updated successfully.", { section }),
+      description: `${section} settings have been updated successfully.`,
     })
   }
 
@@ -516,13 +518,13 @@ export default function SettingsPage() {
                   <div className="flex items-center space-x-2 mt-2">
                     <Button
                       variant={theme === "light" ? "default" : "outline"}
-                      onClick={() => theme === "dark" && toggleTheme()}
+                      onClick={() => toggleTheme()}
                     >
                       {t("Light")}
                     </Button>
                     <Button
-                      variant={theme === "dark" ? "default" : "outline"}
-                      onClick={() => theme === "light" && toggleTheme()}
+                      variant="outline"
+                      onClick={() => toggleTheme()}
                     >
                       {t("Dark")}
                     </Button>
