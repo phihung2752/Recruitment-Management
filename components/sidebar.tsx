@@ -178,10 +178,10 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
               href={item.href}
               onClick={isMobile ? onClose : undefined}
               className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all",
                 isActive
                   ? "bg-hr-primary text-white"
-                  : "text-hr-text-secondary hover:bg-hr-bg-primary hover:text-hr-text-primary"
+                  : "text-hr-text-secondary hover:bg-hr-bg-primary hover:text-hr-text-primary hover:shadow-md"
               )}
             >
               <Icon className="mr-3 h-5 w-5 flex-shrink-0" />

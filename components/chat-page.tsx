@@ -424,7 +424,7 @@ return (
                           <p className="font-semibold">{message.sender}</p>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 hover:shadow-md transition-all">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -478,13 +478,13 @@ return (
                               <span className="text-xs text-muted-foreground">({users.length})</span>
                             </div>
                           ))}
-                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleReaction(message.id, "👍")}>
+                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 hover:shadow-md transition-all" onClick={() => handleReaction(message.id, "👍")}>
                             👍
                           </Button>
-                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleReaction(message.id, "❤️")}>
+                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 hover:shadow-md transition-all" onClick={() => handleReaction(message.id, "❤️")}>
                             ❤️
                           </Button>
-                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleReaction(message.id, "😂")}>
+                          <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 hover:shadow-md transition-all" onClick={() => handleReaction(message.id, "😂")}>
                             😂
                           </Button>
                         </div>

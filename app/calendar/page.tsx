@@ -355,7 +355,7 @@ export default function CalendarPage() {
                 {dayEvents.slice(0, 3).map(event => (
                   <div
                     key={event.id}
-                    className="text-xs p-1 rounded cursor-pointer hover:opacity-80"
+                    className="text-xs p-1 rounded cursor-pointer hover:opacity-80 hover:shadow-md transition-all"
                     style={{ backgroundColor: getEventColor(event) + '20', color: getEventColor(event) }}
                     onClick={() => setSelectedEvent(event)}
                   >
@@ -415,7 +415,7 @@ export default function CalendarPage() {
                   {dayEvents.map(event => (
                     <div
                       key={event.id}
-                      className="text-xs p-1 rounded cursor-pointer hover:opacity-80"
+                      className="text-xs p-1 rounded cursor-pointer hover:opacity-80 hover:shadow-md transition-all"
                       style={{ backgroundColor: getEventColor(event) + '20', color: getEventColor(event) }}
                       onClick={() => setSelectedEvent(event)}
                     >
@@ -453,7 +453,7 @@ export default function CalendarPage() {
             </div>
           ) : (
             dayEvents.map(event => (
-              <Card key={event.id} className="hover:shadow-md transition-shadow">
+              <Card key={event.id} className="hover:shadow-md hover:scale-105 transition-all">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -870,7 +870,7 @@ export default function CalendarPage() {
                       )}
                       <div>
                         <span className="font-medium">Link:</span> 
-                        <a href={selectedEvent.videoLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
+                        <a href={selectedEvent.videoLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline hover:shadow-md transition-all ml-1">
                           {selectedEvent.videoLink}
                         </a>
                       </div>

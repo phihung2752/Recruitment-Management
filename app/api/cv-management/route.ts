@@ -1,5 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+interface CV {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  currentPosition: string
+  experience: number | null
+  skills: string
+  status: string
+  source: string
+  createdAt: string
+  updatedAt: string
+  aiAnalysis?: {
+    score: number
+    strengths: string[]
+    weaknesses: string[]
+    recommendedLabels: string[]
+    matchPercentage: number
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🔥 Getting CVs from backend...')
@@ -73,13 +95,13 @@ export async function GET(request: NextRequest) {
     }))
 
     // Apply source filter
-    let filteredCvs = transformedCvs
+    let filteredCvs: CV[] = transformedCvs
     if (source !== 'All') {
-      filteredCvs = transformedCvs.filter(cv => cv.source === source)
+      filteredCvs = transformedCvs.filter((cv: CV) => cv.source === source)
     }
 
     // Apply AI score filter
-    filteredCvs = filteredCvs.filter(cv => {
+    filteredCvs = filteredCvs.filter((cv: CV) => {
       if (!cv.aiAnalysis) return true
       return cv.aiAnalysis.score >= parseInt(aiScoreMin) && cv.aiAnalysis.score <= parseInt(aiScoreMax)
     })

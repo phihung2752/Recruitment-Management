@@ -704,7 +704,7 @@ export default function AdminDashboard() {
             {adminModules.map((module) => {
               const IconComponent = module.icon
               return (
-                <Card key={module.id} className="hover:shadow-lg transition-shadow">
+                <Card key={module.id} className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                   <CardHeader>
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg ${module.color} text-white`}>

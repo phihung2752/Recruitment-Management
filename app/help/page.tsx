@@ -278,7 +278,7 @@ export default function HelpPage() {
           <div className="flex gap-2">
             <Button
               onClick={() => setShowTicketForm(true)}
-              className="bg-hr-primary hover:bg-hr-primary-dark text-white"
+              className="bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Tạo ticket hỗ trợ
@@ -314,7 +314,7 @@ export default function HelpPage() {
 
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md hover:scale-105 transition-all cursor-pointer">
             <CardContent className="p-4 text-center">
               <BookOpen className="h-8 w-8 text-hr-primary mx-auto mb-2" />
               <h3 className="font-semibold text-hr-text-primary">Tài liệu</h3>
@@ -322,7 +322,7 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md hover:scale-105 transition-all cursor-pointer">
             <CardContent className="p-4 text-center">
               <Video className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               <h3 className="font-semibold text-hr-text-primary">Video hướng dẫn</h3>
@@ -330,7 +330,7 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md hover:scale-105 transition-all cursor-pointer">
             <CardContent className="p-4 text-center">
               <Phone className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <h3 className="font-semibold text-hr-text-primary">Hotline</h3>
@@ -338,7 +338,7 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="bg-hr-bg-secondary border-hr-border hover:shadow-md hover:scale-105 transition-all cursor-pointer">
             <CardContent className="p-4 text-center">
               <Mail className="h-8 w-8 text-purple-600 mx-auto mb-2" />
               <h3 className="font-semibold text-hr-text-primary">Email hỗ trợ</h3>
@@ -395,7 +395,7 @@ export default function HelpPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleHelpful(faq.id, 'faq')}
-                                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                               >
                                 <ThumbsUp className="h-3 w-3 mr-1" />
                                 Hữu ích
@@ -404,7 +404,7 @@ export default function HelpPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleHelpful(faq.id, 'faq')}
-                                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                               >
                                 <ThumbsDown className="h-3 w-3 mr-1" />
                                 Không hữu ích
@@ -429,7 +429,7 @@ export default function HelpPage() {
               <CardContent>
                 <div className="space-y-4">
                   {filteredArticles.map((article) => (
-                    <Card key={article.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md transition-shadow">
+                    <Card key={article.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md hover:scale-105 transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -458,7 +458,7 @@ export default function HelpPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                             >
                               <PlayCircle className="h-3 w-3 mr-1" />
                               Xem
@@ -467,7 +467,7 @@ export default function HelpPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleHelpful(article.id, 'article')}
-                              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                             >
                               <ThumbsUp className="h-3 w-3 mr-1" />
                               Hữu ích
@@ -528,7 +528,7 @@ export default function HelpPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                           >
                             <MessageCircle className="h-3 w-3 mr-1" />
                             Xem chi tiết
@@ -644,7 +644,7 @@ export default function HelpPage() {
                   
                   <Button
                     onClick={handleSubmitTicket}
-                    className="w-full bg-hr-primary hover:bg-hr-primary-dark text-white"
+                    className="w-full bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Gửi ticket hỗ trợ

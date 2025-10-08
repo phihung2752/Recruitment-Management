@@ -171,20 +171,20 @@ export default function CandidatesPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['candidate.read']}>
-      <div className="min-h-screen bg-hr-bg-primary p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-hr-text-primary mb-2">
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">
               Quản lý ứng viên
-            </h1>
+            </h2>
             <p className="text-hr-text-secondary">
               Quản lý và theo dõi đơn xin việc của ứng viên
             </p>
           </div>
+        </div>
 
-          {/* Search and Filters */}
-          <div className="bg-hr-bg-secondary rounded-lg p-6 mb-6">
+        {/* Search and Filters */}
+        <div className="bg-hr-bg-elevated shadow-hr-md border-hr-border-primary rounded-lg p-6">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
               <form onSubmit={handleSearch} className="flex-1">
@@ -217,11 +217,11 @@ export default function CandidatesPage() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button className="px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark transition-colors flex items-center gap-2">
+                <button className="px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark hover:shadow-md transition-all flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   Thêm ứng viên
                 </button>
-                <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors flex items-center gap-2">
+                <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all flex items-center gap-2">
                   <Download className="w-4 h-4" />
                   Xuất Excel
                 </button>
@@ -229,21 +229,21 @@ export default function CandidatesPage() {
             </div>
           </div>
 
-          {/* Bulk Actions */}
-          {selectedCandidates.length > 0 && (
-            <div className="bg-hr-accent/10 border border-hr-accent/20 rounded-lg p-4 mb-6">
+        {/* Bulk Actions */}
+        {selectedCandidates.length > 0 && (
+          <div className="bg-hr-accent/10 border border-hr-accent/20 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <span className="text-hr-text-primary font-medium">
                   {selectedCandidates.length} ứng viên đã chọn
                 </span>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+                  <button className="px-3 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark hover:shadow-md transition-all">
                     Gửi email
                   </button>
-                  <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary">
+                  <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                     Thay đổi trạng thái
                   </button>
-                  <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary">
+                  <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                     Xuất dữ liệu
                   </button>
                 </div>
@@ -251,8 +251,8 @@ export default function CandidatesPage() {
             </div>
           )}
 
-          {/* Candidates List */}
-          <div className="bg-hr-bg-secondary rounded-lg overflow-hidden">
+        {/* Candidates List */}
+        <div className="bg-hr-bg-elevated shadow-hr-md border-hr-border-primary rounded-lg overflow-hidden">
             {loading ? (
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-hr-accent mx-auto mb-4"></div>
@@ -288,7 +288,7 @@ export default function CandidatesPage() {
                 {/* Table Body */}
                 <div className="divide-y divide-hr-border">
                   {candidates.map((candidate) => (
-                    <div key={candidate.id} className="px-6 py-4 hover:bg-hr-bg-primary/50 transition-colors duration-200">
+                    <div key={candidate.id} className="px-6 py-4 hover:bg-hr-bg-primary/50 hover:shadow-md transition-all duration-200">
                       <div className="flex items-center gap-4">
                         <input
                           type="checkbox"
@@ -373,7 +373,7 @@ export default function CandidatesPage() {
                               <button
                                 onClick={() => handleAIAnalysis(candidate.id)}
                                 disabled={aiAnalysisLoading === candidate.id}
-                                className="p-1 hover:bg-hr-bg-tertiary rounded transition-colors"
+                                className="p-1 hover:bg-hr-bg-tertiary hover:shadow-md rounded transition-all"
                                 title="AI Analysis"
                               >
                                 {aiAnalysisLoading === candidate.id ? (
@@ -385,7 +385,7 @@ export default function CandidatesPage() {
                               
                               <button
                                 onClick={() => handleViewInterview(candidate.id)}
-                                className="p-1 hover:bg-hr-bg-tertiary rounded transition-colors"
+                                className="p-1 hover:bg-hr-bg-tertiary hover:shadow-md rounded transition-all"
                                 title="Xem phỏng vấn"
                               >
                                 <FileText className="w-4 h-4 text-hr-text-muted" />
@@ -458,9 +458,9 @@ export default function CandidatesPage() {
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
               <div className="text-sm text-hr-text-muted">
                 Hiển thị {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, candidates.length)} của {candidates.length} ứng viên
               </div>
@@ -469,7 +469,7 @@ export default function CandidatesPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Trước
                 </button>
@@ -484,7 +484,7 @@ export default function CandidatesPage() {
                         className={`px-3 py-1 rounded ${
                           currentPage === page
                             ? 'bg-hr-accent text-white'
-                            : 'border border-hr-border hover:bg-hr-bg-secondary'
+                            : 'border border-hr-border hover:bg-hr-bg-secondary hover:shadow-md transition-all'
                         }`}
                       >
                         {page}
@@ -499,7 +499,7 @@ export default function CandidatesPage() {
                         className={`px-3 py-1 rounded ${
                           currentPage === totalPages
                             ? 'bg-hr-accent text-white'
-                            : 'border border-hr-border hover:bg-hr-bg-secondary'
+                            : 'border border-hr-border hover:bg-hr-bg-secondary hover:shadow-md transition-all'
                         }`}
                       >
                         {totalPages}
@@ -511,14 +511,13 @@ export default function CandidatesPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Sau
                 </button>
               </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   )

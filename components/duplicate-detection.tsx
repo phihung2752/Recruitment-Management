@@ -16,7 +16,8 @@ import {
   Phone,
   Trash2,
   UserX,
-  Link
+  Link,
+  FileText
 } from 'lucide-react'
 
 interface DuplicateSubmission {
@@ -134,7 +135,7 @@ export default function DuplicateDetection({
             </p>
             <button
               onClick={() => setShowDuplicateHistory(true)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 hover:shadow-md transition-all text-sm font-medium"
             >
               Xem lịch sử nộp CV ({duplicates.length})
             </button>

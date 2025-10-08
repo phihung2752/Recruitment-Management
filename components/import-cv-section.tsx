@@ -118,14 +118,14 @@ export default function ImportCVSection() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-hr-bg-secondary rounded-lg p-6">
+      <div className="bg-hr-bg-secondary rounded-lg p-6 border border-hr-border">
         <h2 className="text-xl font-semibold text-hr-text-primary mb-4">
           Import CV từ các nguồn
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Job Portals Integration */}
-          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border hover:shadow-hr-md transition-shadow">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="w-5 h-5 text-hr-accent" />
               <h3 className="font-medium text-hr-text-primary">Kết nối trang tuyển dụng</h3>
@@ -142,7 +142,7 @@ export default function ImportCVSection() {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(method.status)}`}>
                       {getStatusText(method.status)}
                     </span>
-                    <button className="text-hr-accent hover:text-hr-accent-dark text-sm">
+                    <button className="text-hr-accent hover:text-hr-accent-dark hover:shadow-md text-sm transition-all">
                       {method.status === 'connected' ? 'Configure' : 'Connect'}
                     </button>
                   </div>
@@ -150,7 +150,7 @@ export default function ImportCVSection() {
               ))}
             </div>
             
-            <button className="w-full mt-4 px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark transition-colors flex items-center justify-center gap-2">
+            <button className="w-full mt-4 px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark hover:shadow-md transition-all flex items-center justify-center gap-2">
               <RefreshCw className="w-4 h-4" />
               Sync All CVs Now
             </button>
@@ -161,7 +161,7 @@ export default function ImportCVSection() {
           </div>
 
           {/* Email Integration */}
-          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border hover:shadow-hr-md transition-shadow">
             <div className="flex items-center gap-2 mb-3">
               <Mail className="w-5 h-5 text-hr-accent" />
               <h3 className="font-medium text-hr-text-primary">Import từ Email</h3>
@@ -189,20 +189,20 @@ export default function ImportCVSection() {
               </div>
             </div>
             
-            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors text-sm">
+            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all text-sm">
               Configure Email Rules
             </button>
           </div>
 
           {/* Upload Files */}
-          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border hover:shadow-hr-md transition-shadow">
             <div className="flex items-center gap-2 mb-3">
               <Upload className="w-5 h-5 text-hr-accent" />
               <h3 className="font-medium text-hr-text-primary">Upload CV thủ công</h3>
             </div>
             
             <div
-              className="border-2 border-dashed border-hr-border rounded-lg p-6 text-center hover:border-hr-accent transition-colors cursor-pointer"
+              className="border-2 border-dashed border-hr-border rounded-lg p-6 text-center hover:border-hr-accent hover:shadow-md transition-all cursor-pointer"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => document.getElementById('file-upload')?.click()}
@@ -210,7 +210,7 @@ export default function ImportCVSection() {
               <Upload className="w-8 h-8 text-hr-text-muted mx-auto mb-2" />
               <p className="text-sm text-hr-text-primary mb-1">Kéo thả CV vào đây</p>
               <p className="text-xs text-hr-text-muted mb-2">hoặc</p>
-              <button className="px-4 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+              <button className="px-4 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark hover:shadow-md transition-all">
                 Chọn file
               </button>
               <p className="text-xs text-hr-text-muted mt-2">
@@ -241,26 +241,26 @@ export default function ImportCVSection() {
                     </div>
                     <button
                       onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 hover:shadow-md transition-all"
                     >
                       ×
                     </button>
                   </div>
                 ))}
-                <button className="w-full px-4 py-2 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+                <button className="w-full px-4 py-2 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark hover:shadow-md transition-all">
                   Upload {uploadedFiles.length} files
                 </button>
               </div>
             )}
             
-            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors text-sm flex items-center justify-center gap-2">
+            <button className="w-full mt-3 px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all text-sm flex items-center justify-center gap-2">
               <Upload className="w-4 h-4" />
               Upload nhiều CV cùng lúc
             </button>
           </div>
 
           {/* Web Form */}
-          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border">
+          <div className="bg-hr-bg-primary rounded-lg p-4 border border-hr-border hover:shadow-hr-md transition-shadow">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="w-5 h-5 text-hr-accent" />
               <h3 className="font-medium text-hr-text-primary">Form nộp CV trên website</h3>

@@ -203,15 +203,14 @@ export default function JobPostingsPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['job.read']}>
-      <div className="p-6 space-y-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
-        {/* Header */}
-        <div className="flex justify-between items-center">
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
           <div>
-            <h1 className="text-3xl font-bold text-hr-text-primary">Job Postings</h1>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">Job Postings</h2>
             <p className="text-hr-text-secondary">Create and manage job postings.</p>
           </div>
           <Button 
-            className="bg-hr-primary text-white hover:bg-hr-primary/90"
+            className="bg-hr-primary text-white hover:bg-hr-primary/90 hover:shadow-md transition-all"
             onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -286,7 +285,7 @@ export default function JobPostingsPage() {
             <div className="text-center py-8 text-hr-text-secondary">No job postings found.</div>
           ) : (
             filteredJobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow bg-hr-bg-secondary border-hr-border">
+              <Card key={job.id} className="hover:shadow-md hover:scale-105 transition-all bg-hr-bg-secondary border-hr-border">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -414,7 +413,7 @@ export default function JobPostingsPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-              <Button className="bg-hr-primary text-white hover:bg-hr-primary/90">Create Job Posting</Button>
+              <Button className="bg-hr-primary text-white hover:bg-hr-primary/90 hover:shadow-md transition-all">Create Job Posting</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

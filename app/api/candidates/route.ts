@@ -46,16 +46,36 @@ async function createCandidate(request: NextRequest) {
     const body = await request.json()
     const { firstName, lastName, email, phone, position, experience, skills, expectedSalary, source, notes } = body
     
-    const result = await executeQuery(`
-      INSERT INTO Candidates 
-      (FirstName, LastName, Email, Phone, Position, Experience, Skills, ExpectedSalary, Source, Notes, Status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'New')
-    `, [firstName, lastName, email, phone, position, experience, skills, expectedSalary, source, notes])
+    // Call backend API to create candidate
+    const response = await fetch('http://localhost:5000/api/admin/candidates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        phone,
+        position,
+        experience,
+        skills,
+        expectedSalary,
+        source,
+        notes
+      })
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Backend API error: ${response.status} ${response.statusText}`)
+    }
+    
+    const data = await response.json()
     
     return NextResponse.json({
       success: true,
       message: 'Candidate created successfully',
-      candidateId: (result as any).insertId
+      data
     })
   } catch (error) {
     console.error('Create candidate error:', error)

@@ -42,15 +42,17 @@ export default function AnalyticsPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['analytics.view']}>
-      <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Analytics & Reports</h1>
-        <p className="text-gray-600">Comprehensive analytics and reporting dashboard</p>
-      </div>
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">Analytics & Reports</h2>
+            <p className="text-hr-text-secondary">Comprehensive analytics and reporting dashboard</p>
+          </div>
+        </div>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="hover:shadow-md hover:scale-105 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -63,7 +65,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md hover:scale-105 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Interviews</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -76,7 +78,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md hover:scale-105 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Hire Rate</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
@@ -89,7 +91,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md hover:scale-105 transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Cost per Hire</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />

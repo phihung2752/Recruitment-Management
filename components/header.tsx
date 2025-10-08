@@ -59,7 +59,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className="lg:hidden hover:shadow-md transition-all"
               onClick={onMenuClick}
             >
               <Menu className="h-5 w-5" />
@@ -112,7 +112,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="hidden sm:flex"
+              className="hidden sm:flex hover:shadow-md transition-all"
             >
               {isDarkMode ? (
                 <Sun className="h-4 w-4" />
@@ -122,7 +122,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
+            <Button variant="ghost" size="sm" className="relative hover:shadow-md transition-all">
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full flex items-center justify-center">
                 <span className="text-xs text-white font-medium">2</span>
@@ -132,7 +132,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2 px-2">
+                <Button variant="ghost" className="flex items-center space-x-2 px-2 hover:shadow-md transition-all">
                   <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                     <UserCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>

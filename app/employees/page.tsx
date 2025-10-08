@@ -278,21 +278,21 @@ export default function EmployeesPage() {
           <div className="flex gap-2">
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-hr-primary hover:bg-hr-primary-dark text-white"
+              className="bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
             >
               <Plus className="h-4 w-4 mr-2" />
               Thêm nhân viên
             </Button>
             <Button
               variant="outline"
-              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
             >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button
               variant="outline"
-              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
             >
               <Upload className="h-4 w-4 mr-2" />
               Import
@@ -429,7 +429,7 @@ export default function EmployeesPage() {
           <CardContent>
             <div className="space-y-4">
               {filteredEmployees.map((employee) => (
-                <Card key={employee.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md transition-shadow">
+                <Card key={employee.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md hover:scale-105 transition-all">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
@@ -522,21 +522,21 @@ export default function EmployeesPage() {
                               setSelectedEmployee(employee)
                               setShowEditDialog(true)
                             }}
-                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -547,7 +547,7 @@ export default function EmployeesPage() {
                             <Button
                               size="sm"
                               onClick={() => handleEmployeeAction('activate', employee.id)}
-                              className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                              className="bg-green-600 hover:bg-green-700 hover:shadow-md text-white text-xs transition-all"
                             >
                               Kích hoạt
                             </Button>
@@ -556,7 +556,7 @@ export default function EmployeesPage() {
                             <Button
                               size="sm"
                               onClick={() => handleEmployeeAction('deactivate', employee.id)}
-                              className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs"
+                              className="bg-yellow-600 hover:bg-yellow-700 hover:shadow-md text-white text-xs transition-all"
                             >
                               Vô hiệu hóa
                             </Button>
@@ -564,7 +564,7 @@ export default function EmployeesPage() {
                           <Button
                             size="sm"
                             onClick={() => handleEmployeeAction('terminate', employee.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white text-xs"
+                            className="bg-red-600 hover:bg-red-700 hover:shadow-md text-white text-xs transition-all"
                           >
                             Chấm dứt
                           </Button>
@@ -651,7 +651,7 @@ export default function EmployeesPage() {
                 <Button
                   variant="outline"
                   onClick={() => setShowCreateDialog(false)}
-                  className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                  className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
                 >
                   Hủy
                 </Button>
@@ -663,7 +663,7 @@ export default function EmployeesPage() {
                       description: "Đã thêm nhân viên mới",
                     })
                   }}
-                  className="bg-hr-primary hover:bg-hr-primary-dark text-white"
+                  className="bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
                 >
                   Thêm nhân viên
                 </Button>

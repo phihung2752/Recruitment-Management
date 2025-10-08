@@ -319,17 +319,16 @@ export default function InterviewsPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['interview.read']}>
-      <div className="space-y-4 p-4 bg-hr-bg-primary text-hr-text-primary min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold">{t("Interviews")}</h1>
-          <p className="text-muted-foreground">{t("AI-powered interview management")}</p>
-        </div>
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">{t("Interviews")}</h2>
+            <p className="text-hr-text-secondary">{t("AI-powered interview management")}</p>
+          </div>
         <div className="flex flex-wrap gap-2">
           <Button 
             variant="outline" 
-            className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+            className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:shadow-md transition-all"
             onClick={handleCollectCVs}
           >
             <FileText className="mr-2 h-4 w-4" />
@@ -337,7 +336,7 @@ export default function InterviewsPage() {
           </Button>
           <Button 
             variant="outline" 
-            className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+            className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:shadow-md transition-all"
             onClick={handleAIAnalysis}
           >
             <Bot className="mr-2 h-4 w-4" />
@@ -377,7 +376,7 @@ export default function InterviewsPage() {
                   {paginatedCandidates.map((candidate) => (
                     <Card 
                       key={candidate.id} 
-                      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 ${
                         selectedCandidate?.id === candidate.id ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
                       onClick={() => setSelectedCandidate(candidate)}
@@ -492,7 +491,7 @@ export default function InterviewsPage() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-green-600 text-white border-green-600 hover:bg-green-700 disabled:opacity-50"
+                        className="bg-green-600 text-white border-green-600 hover:bg-green-700 hover:shadow-md transition-all disabled:opacity-50"
                         onClick={handlePassRound}
                         disabled={processingRound || !selectedCandidate}
                       >
@@ -502,7 +501,7 @@ export default function InterviewsPage() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-red-600 text-white border-red-600 hover:bg-red-700 disabled:opacity-50"
+                        className="bg-red-600 text-white border-red-600 hover:bg-red-700 hover:shadow-md transition-all disabled:opacity-50"
                         onClick={handleFailRound}
                         disabled={processingRound || !selectedCandidate}
                       >
@@ -583,7 +582,7 @@ export default function InterviewsPage() {
                           Advanced AI analysis using Google AI API
                         </p>
                         <Button 
-                          className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" 
+                          className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 hover:shadow-md transition-all" 
                           onClick={handleAIAnalysis}
                         >
                           <Brain className="mr-2 h-4 w-4" />
@@ -627,7 +626,7 @@ export default function InterviewsPage() {
                           Automatically collect CVs from job posting sites
                         </p>
                         <Button 
-                          className="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" 
+                          className="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:shadow-md transition-all" 
                           onClick={handleCollectCVs}
                         >
                           <FileText className="mr-2 h-4 w-4" />
@@ -644,7 +643,7 @@ export default function InterviewsPage() {
                           AI-powered CV analysis and candidate classification
                         </p>
                         <Button 
-                          className="bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" 
+                          className="bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 hover:shadow-md transition-all" 
                           onClick={handleAIAnalysis}
                         >
                           <Target className="mr-2 h-4 w-4" />

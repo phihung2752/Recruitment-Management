@@ -10,7 +10,8 @@ import {
   PieChart,
   Download,
   Filter,
-  Calendar
+  Calendar,
+  Star
 } from 'lucide-react'
 
 interface SourceData {
@@ -186,15 +187,15 @@ export default function SourceAnalytics({ data = mockData, dateRange }: SourceAn
           <p className="text-hr-text-muted">Hiệu quả và chi phí của từng nguồn CV</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all flex items-center gap-2">
             <Filter className="w-4 h-4" />
             Bộ lọc
           </button>
-          <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Chọn khoảng thời gian
           </button>
-          <button className="px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 bg-hr-accent text-white rounded-lg hover:bg-hr-accent-dark hover:shadow-md transition-all flex items-center gap-2">
             <Download className="w-4 h-4" />
             Xuất báo cáo
           </button>

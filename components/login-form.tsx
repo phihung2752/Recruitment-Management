@@ -108,7 +108,7 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full hover:shadow-md transition-all"
                 disabled={loading}
               >
                 {loading ? (

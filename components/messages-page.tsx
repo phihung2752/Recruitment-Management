@@ -408,7 +408,7 @@ export default function MessagesPage() {
                   {filteredMessages.map((message) => (
                     <div
                       key={message.id}
-                      className={`p-4 border-b cursor-pointer hover:bg-accent ${
+                      className={`p-4 border-b cursor-pointer hover:bg-accent hover:shadow-md transition-all ${
                         selectedMessage?.id === message.id ? "bg-accent" : ""
                       } ${!message.read ? "bg-blue-50 dark:bg-blue-950" : ""}`}
                       onClick={() => {

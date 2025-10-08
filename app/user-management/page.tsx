@@ -289,7 +289,7 @@ export default function UserManagementPage() {
           {hasPermission('users.create') && (
             <Button 
               onClick={() => setIsCreateDialogOpen(true)} 
-              className="bg-hr-primary hover:bg-hr-primary-dark text-white"
+              className="bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
             >
               <Plus className="h-4 w-4 mr-2" />
               Tạo người dùng mới
@@ -343,7 +343,7 @@ export default function UserManagementPage() {
             ) : (
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.userId} className="flex items-center justify-between p-4 border border-hr-border rounded-lg hover:bg-hr-bg-secondary">
+                  <div key={user.userId} className="flex items-center justify-between p-4 border border-hr-border rounded-lg hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-hr-primary bg-opacity-20 rounded-full flex items-center justify-center">
                         <Users className="h-5 w-5 text-hr-primary" />
@@ -395,7 +395,7 @@ export default function UserManagementPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteUser(user.userId)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 hover:shadow-md transition-all"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -480,7 +480,7 @@ export default function UserManagementPage() {
                 <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   Hủy
                 </Button>
-                <Button onClick={handleCreateUser} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleCreateUser} className="bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all">
                   <Save className="h-4 w-4 mr-2" />
                   Tạo người dùng
                 </Button>
@@ -560,7 +560,7 @@ export default function UserManagementPage() {
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Hủy
                 </Button>
-                <Button onClick={handleUpdateUser} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleUpdateUser} className="bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all">
                   <Save className="h-4 w-4 mr-2" />
                   Cập nhật
                 </Button>

@@ -65,14 +65,13 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['system.settings']}>
-      <div className="p-6 space-y-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-hr-text-primary">Settings</h1>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">Settings</h2>
             <p className="text-hr-text-secondary">Manage your system preferences and configurations</p>
           </div>
-          <Button onClick={handleSave} className="bg-hr-primary text-white hover:bg-hr-primary/90">
+          <Button onClick={handleSave} className="bg-hr-primary text-white hover:bg-hr-primary/90 hover:shadow-md transition-all">
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>

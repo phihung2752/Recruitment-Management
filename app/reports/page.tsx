@@ -20,11 +20,10 @@ export default function ReportsPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['report.read']}>
-      <div className="p-6 space-y-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-hr-text-primary">Reports & Analytics</h1>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">Reports & Analytics</h2>
             <p className="text-hr-text-secondary">View detailed reports and analytics for your HR operations</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -39,7 +38,7 @@ export default function ReportsPage() {
                 <SelectItem value="1year">Last year</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="border-hr-border text-hr-text-primary">
+            <Button variant="outline" className="border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary hover:shadow-md transition-all">
               <Download className="mr-2 h-4 w-4" />
               Export Report
             </Button>
@@ -274,7 +273,7 @@ export default function ReportsPage() {
                   <h3 className="font-medium text-hr-text-primary">Recruitment Report</h3>
                   <p className="text-sm text-hr-text-secondary">Comprehensive recruitment analytics</p>
                 </div>
-                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary">
+                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                   <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>
@@ -284,7 +283,7 @@ export default function ReportsPage() {
                   <h3 className="font-medium text-hr-text-primary">Interview Report</h3>
                   <p className="text-sm text-hr-text-secondary">Interview performance and outcomes</p>
                 </div>
-                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary">
+                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                   <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>
@@ -294,7 +293,7 @@ export default function ReportsPage() {
                   <h3 className="font-medium text-hr-text-primary">Employee Report</h3>
                   <p className="text-sm text-hr-text-secondary">Employee statistics and trends</p>
                 </div>
-                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary">
+                <Button variant="outline" size="sm" className="border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                   <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>

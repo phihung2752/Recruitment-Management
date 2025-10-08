@@ -188,7 +188,7 @@ export default function AIScoreDetail({
         <div className="flex items-center gap-2">
           <button
             onClick={onViewComparison}
-            className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-primary transition-colors flex items-center gap-1"
+            className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-primary hover:shadow-md transition-all flex items-center gap-1"
           >
             <BarChart3 className="w-4 h-4" />
             So sánh

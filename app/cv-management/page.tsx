@@ -283,17 +283,17 @@ export default function CVManagementPage() {
 
   return (
     <ProtectedRoute requiredPermissions={['candidate.read']}>
-      <div className="min-h-screen bg-hr-bg-primary p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-hr-text-primary mb-2">
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">
               Quản lý CV
-            </h1>
+            </h2>
             <p className="text-hr-text-secondary">
               Quản lý, phân tích và theo dõi CV ứng viên với AI
             </p>
           </div>
+        </div>
 
           {/* Tabs */}
           <div className="flex border-b border-hr-border mb-6">
@@ -423,16 +423,16 @@ export default function CVManagementPage() {
                       {selectedCVs.length} CV đã chọn
                     </span>
                     <div className="flex gap-2">
-                      <button className="px-3 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark">
+                      <button className="px-3 py-1 bg-hr-accent text-white rounded text-sm hover:bg-hr-accent-dark hover:shadow-md transition-all">
                         Gửi email
                       </button>
-                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary">
+                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                         Thay đổi trạng thái
                       </button>
-                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary">
+                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                         Thêm tags
                       </button>
-                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary">
+                      <button className="px-3 py-1 border border-hr-border rounded text-sm hover:bg-hr-bg-secondary hover:shadow-md transition-all">
                         Xuất dữ liệu
                       </button>
                     </div>
@@ -478,7 +478,7 @@ export default function CVManagementPage() {
                     {/* Table Body */}
                     <div className="divide-y divide-hr-border">
                       {cvs.map((cv) => (
-                        <div key={cv.id} className="px-6 py-4 hover:bg-hr-bg-primary/50 transition-colors duration-200">
+                        <div key={cv.id} className="px-6 py-4 hover:bg-hr-bg-primary/50 hover:shadow-md transition-all duration-200">
                           {/* Duplicate Detection */}
                           {cv.duplicates && cv.duplicates.length > 0 && (
                             <DuplicateDetection
@@ -582,7 +582,7 @@ export default function CVManagementPage() {
                                   <button
                                     onClick={() => handleAIAnalysis(cv.id)}
                                     disabled={aiAnalysisLoading === cv.id}
-                                    className="px-2 py-1 bg-hr-accent/10 text-hr-accent rounded text-xs hover:bg-hr-accent/20 transition-colors disabled:opacity-50"
+                                    className="px-2 py-1 bg-hr-accent/10 text-hr-accent rounded text-xs hover:bg-hr-accent/20 hover:shadow-md transition-all disabled:opacity-50"
                                   >
                                     {aiAnalysisLoading === cv.id ? 'Analyzing...' : 'Analyze'}
                                   </button>
@@ -595,7 +595,7 @@ export default function CVManagementPage() {
                                   <button
                                     onClick={() => handleAIAnalysis(cv.id)}
                                     disabled={aiAnalysisLoading === cv.id}
-                                    className="p-1 hover:bg-hr-bg-tertiary rounded transition-colors"
+                                    className="p-1 hover:bg-hr-bg-tertiary hover:shadow-md rounded transition-all"
                                     title="AI Analysis"
                                   >
                                     {aiAnalysisLoading === cv.id ? (
@@ -653,7 +653,7 @@ export default function CVManagementPage() {
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Trước
                     </button>
@@ -695,7 +695,7 @@ export default function CVManagementPage() {
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-1 border border-hr-border rounded hover:bg-hr-bg-secondary hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Sau
                     </button>
@@ -712,7 +712,6 @@ export default function CVManagementPage() {
           {activeTab === 'analytics' && (
             <SourceAnalytics />
           )}
-        </div>
       </div>
     </ProtectedRoute>
   )

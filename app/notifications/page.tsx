@@ -371,7 +371,7 @@ export default function NotificationsPage() {
             <Button
               onClick={handleSendTestNotification}
               variant="outline"
-              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
             >
               <Send className="h-4 w-4 mr-2" />
               Gửi test
@@ -379,7 +379,7 @@ export default function NotificationsPage() {
             <Button
               onClick={() => setActiveTab('settings')}
               variant="outline"
-              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary hover:shadow-md transition-all"
             >
               <Settings className="h-4 w-4 mr-2" />
               Cài đặt
@@ -530,7 +530,7 @@ export default function NotificationsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {filteredNotifications.map((notification) => (
-                    <Card key={notification.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md transition-shadow">
+                    <Card key={notification.id} className="bg-hr-bg-primary border-hr-border hover:shadow-md hover:scale-105 transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start space-x-3">
@@ -595,7 +595,7 @@ export default function NotificationsPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleNotificationAction('resend', notification.id)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                                className="bg-blue-600 hover:bg-blue-700 hover:shadow-md text-white text-xs transition-all"
                               >
                                 Gửi lại
                               </Button>
@@ -604,7 +604,7 @@ export default function NotificationsPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleNotificationAction('cancel', notification.id)}
-                                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs"
+                                className="bg-yellow-600 hover:bg-yellow-700 hover:shadow-md text-white text-xs transition-all"
                               >
                                 Hủy
                               </Button>
@@ -612,7 +612,7 @@ export default function NotificationsPage() {
                             <Button
                               size="sm"
                               onClick={() => handleNotificationAction('delete', notification.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white text-xs"
+                              className="bg-red-600 hover:bg-red-700 hover:shadow-md text-white text-xs transition-all"
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -876,7 +876,7 @@ export default function NotificationsPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleSaveSettings}
-                    className="bg-hr-primary hover:bg-hr-primary-dark text-white"
+                    className="bg-hr-primary hover:bg-hr-primary-dark hover:shadow-md text-white transition-all"
                   >
                     <Settings className="h-4 w-4 mr-2" />
                     Lưu cài đặt
