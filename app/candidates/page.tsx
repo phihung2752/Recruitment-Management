@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
-import ProtectedRoute from '@/components/protected-route'
+// import ProtectedRoute from '@/components/protected-route'
 import { 
   Search, 
   Filter, 
@@ -170,8 +170,7 @@ export default function CandidatesPage() {
   }
 
   return (
-    <ProtectedRoute requiredPermissions={['candidate.read']}>
-      <div className="flex-1 space-y-4 p-4 md:p-6">
+    <div className="flex-1 space-y-4 p-4 md:p-6">
         <div className="flex items-center justify-between space-y-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">
@@ -519,6 +518,5 @@ export default function CandidatesPage() {
           </div>
         )}
       </div>
-    </ProtectedRoute>
   )
 }

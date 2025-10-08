@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
-import ProtectedRoute from '@/components/protected-route'
+// import ProtectedRoute from '@/components/protected-route'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -256,13 +256,12 @@ export default function JobPostingsPage() {
     console.log(`${action} job ${jobId}`)
   }
 
-  if (!isAuthenticated) {
-    return <div>Please log in to view job postings.</div>
-  }
+  // if (!isAuthenticated) {
+  //   return <div>Please log in to view job postings.</div>
+  // }
 
   return (
-    <ProtectedRoute requiredPermissions={['job.read']}>
-      <div className="flex-1 space-y-4 p-4 md:p-6">
+    <div className="flex-1 space-y-4 p-4 md:p-6">
         <div className="flex items-center justify-between space-y-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">Job Postings</h2>
@@ -543,6 +542,5 @@ export default function JobPostingsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </ProtectedRoute>
   )
 }
