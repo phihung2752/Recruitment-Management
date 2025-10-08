@@ -179,7 +179,8 @@ export default function InterviewsPage() {
   const fetchCandidates = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/candidates?search=${encodeURIComponent(searchTerm)}&status=${statusFilter}`)
+      // Connect to real backend API
+      const response = await fetch(`http://localhost:5000/api/candidates?search=${encodeURIComponent(searchTerm)}&status=${statusFilter}`)
       if (response.ok) {
         const data = await response.json()
         // Filter chỉ qualified candidates (Applied, Interviewed, Hired)
