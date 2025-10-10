@@ -26,6 +26,7 @@ import {
   Award,
   GraduationCap
 } from "lucide-react"
+import ActivityLog from "@/components/activity-log"
 
 interface UserProfile {
   id: string
@@ -492,41 +493,7 @@ export default function UserProfilePage() {
 
         {/* Activity Tab */}
         <TabsContent value="activity" className="space-y-6">
-          <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
-              <CardTitle className="text-hr-text-primary flex items-center">
-                <Activity className="h-5 w-5 mr-2" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-hr-text-primary">Profile updated</p>
-                    <p className="text-xs text-hr-text-secondary">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-hr-text-primary">Logged in</p>
-                    <p className="text-xs text-hr-text-secondary">
-                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-hr-text-primary">Password changed</p>
-                    <p className="text-xs text-hr-text-secondary">1 week ago</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ActivityLog userId={user.id} showFilters={true} maxEntries={20} />
         </TabsContent>
 
         {/* Documents Tab */}

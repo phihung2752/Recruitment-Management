@@ -27,7 +27,8 @@ import {
   ChevronDown,
   ChevronRight,
   CheckCircle,
-  Shield
+  Shield,
+  Activity
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -181,6 +182,13 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
       href: "/settings",
       icon: Settings,
       permission: "system.settings",
+      group: "admin"
+    },
+    {
+      title: "Activity Log",
+      href: "/activity-log",
+      icon: Activity,
+      permission: "activity.read",
       group: "admin"
     },
     
