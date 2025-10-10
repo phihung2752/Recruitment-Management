@@ -663,85 +663,6 @@ namespace HRManagementSystem.Controllers
 
                     return Ok(new { success = true, message = "User created successfully", user = newUser });
                 }
-                else
-                {
-                    return StatusCode(500, new { message = "Failed to retrieve created user" });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating user");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-
-    [HttpPut("users/{userId}")]
-    public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
-    {
-        try
-        {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            // Check if user exists
-            var checkQuery = "SELECT COUNT(*) FROM Users WHERE Id = @UserId";
-            using var checkCommand = new SqlCommand(checkQuery, connection);
-            checkCommand.Parameters.AddWithValue("@UserId", userId);
-            
-            var userExists = (int)await checkCommand.ExecuteScalarAsync() > 0;
-            if (!userExists)
-            {
-                return NotFound(new { success = false, message = "User not found" });
-            }
-
-            // Update user
-            var updateQuery = @"
-                UPDATE Users SET
-                    Username = @Username,
-                    Email = @Email,
-                    FirstName = @FirstName,
-                    LastName = @LastName,
-                    Phone = @Phone,
-                    EmployeeId = @EmployeeId,
-                    Position = @Position,
-                    Level = @Level,
-                    EmploymentType = @EmploymentType,
-                    EmploymentStatus = @EmploymentStatus,
-                    WorkLocation = @WorkLocation,
-                    JoinDate = @JoinDate,
-                    AvatarUrl = @AvatarUrl,
-                    IsActive = @IsActive,
-                    UpdatedAt = GETDATE()
-                WHERE Id = @UserId";
-
-            using var command = new SqlCommand(updateQuery, connection);
-            command.Parameters.AddWithValue("@UserId", userId);
-            command.Parameters.AddWithValue("@Username", request.Username ?? "");
-            command.Parameters.AddWithValue("@Email", request.Email ?? "");
-            command.Parameters.AddWithValue("@FirstName", request.FirstName ?? "");
-            command.Parameters.AddWithValue("@LastName", request.LastName ?? "");
-            command.Parameters.AddWithValue("@Phone", request.Phone ?? "");
-            command.Parameters.AddWithValue("@EmployeeId", request.EmployeeId ?? "");
-            command.Parameters.AddWithValue("@Position", request.Position ?? "");
-            command.Parameters.AddWithValue("@Level", request.Level ?? "");
-            command.Parameters.AddWithValue("@EmploymentType", request.EmploymentType ?? "");
-            command.Parameters.AddWithValue("@EmploymentStatus", request.EmploymentStatus ?? "");
-            command.Parameters.AddWithValue("@WorkLocation", request.WorkLocation ?? "");
-            command.Parameters.AddWithValue("@JoinDate", string.IsNullOrEmpty(request.JoinDate) ? DBNull.Value : DateTime.Parse(request.JoinDate));
-            command.Parameters.AddWithValue("@AvatarUrl", request.AvatarUrl ?? "");
-            command.Parameters.AddWithValue("@IsActive", request.Status == "Active" ? 1 : 0);
-
-            await command.ExecuteNonQueryAsync();
-
-            return Ok(new { success = true, message = "User updated successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating user");
-            return StatusCode(500, new { success = false, message = "Internal server error" });
-        }
-    }
 
                 return StatusCode(500, new { message = "Failed to retrieve created user" });
             }
@@ -992,32 +913,14 @@ namespace HRManagementSystem.Controllers
             }
         }
 
-    public class CreateUserRequest
-    {
-        public string Username { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string FirstName { get; set; } = "";
-        public string LastName { get; set; } = "";
-    }
-
-    public class UpdateUserRequest
-    {
-        public string Username { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string FirstName { get; set; } = "";
-        public string LastName { get; set; } = "";
-        public string Phone { get; set; } = "";
-        public string EmployeeId { get; set; } = "";
-        public string Position { get; set; } = "";
-        public string Level { get; set; } = "";
-        public string EmploymentType { get; set; } = "";
-        public string EmploymentStatus { get; set; } = "";
-        public string WorkLocation { get; set; } = "";
-        public string JoinDate { get; set; } = "";
-        public string AvatarUrl { get; set; } = "";
-        public string Status { get; set; } = "";
-    }
+        public class CreateUserRequest
+        {
+            public string Username { get; set; } = "";
+            public string Email { get; set; } = "";
+            public string Password { get; set; } = "";
+            public string FirstName { get; set; } = "";
+            public string LastName { get; set; } = "";
+        }
 
         public class AssignRoleRequest
         {

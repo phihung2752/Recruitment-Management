@@ -10,7 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Users, Plus, Edit, Trash2, Eye, Key, Mail, MoreVertical, ChevronLeft, ChevronRight, Save, X } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { Users, Plus, Edit, Trash2, Eye, Key, Mail, MoreVertical, ChevronLeft, ChevronRight, Save, X, Filter, Calendar as CalendarIcon, CheckSquare, Square, Send, UserCog, UserX, Download, Upload } from "lucide-react"
 
 interface User {
   id: string
@@ -49,6 +51,21 @@ export default function UsersPage() {
   const [editFormOpen, setEditFormOpen] = useState(false)
   const [editFormData, setEditFormData] = useState<Partial<User>>({})
   const [saving, setSaving] = useState(false)
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    role: '',
+    status: '',
+    department: '',
+    employmentType: '',
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined }
+  })
+  const [showFilters, setShowFilters] = useState(false)
+  
+  // Bulk actions states
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [showBulkActions, setShowBulkActions] = useState(false)
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -81,7 +98,7 @@ export default function UsersPage() {
 
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase()
-    return (
+    const matchesSearch = (
       (user.username || '').toLowerCase().includes(searchLower) ||
       (user.email || '').toLowerCase().includes(searchLower) ||
       (user.firstName || '').toLowerCase().includes(searchLower) ||
@@ -91,6 +108,23 @@ export default function UsersPage() {
       (user.position || '').toLowerCase().includes(searchLower) ||
       (user.departmentName || '').toLowerCase().includes(searchLower)
     )
+    
+    const matchesRole = !filters.role || user.roleName === filters.role
+    const matchesStatus = !filters.status || user.status === filters.status
+    const matchesDepartment = !filters.department || user.departmentName === filters.department
+    const matchesEmploymentType = !filters.employmentType || user.employmentType === filters.employmentType
+    
+    let matchesDateRange = true
+    if (filters.dateRange.from && user.joinDate) {
+      const joinDate = new Date(user.joinDate)
+      matchesDateRange = joinDate >= filters.dateRange.from
+    }
+    if (filters.dateRange.to && user.joinDate) {
+      const joinDate = new Date(user.joinDate)
+      matchesDateRange = matchesDateRange && joinDate <= filters.dateRange.to
+    }
+    
+    return matchesSearch && matchesRole && matchesStatus && matchesDepartment && matchesEmploymentType && matchesDateRange
   })
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
@@ -162,6 +196,90 @@ export default function UsersPage() {
     setEditFormData({})
   }
 
+  const handleFilterChange = (key: string, value: string | Date | undefined) => {
+    if (key === 'dateRange') {
+      setFilters(prev => ({ ...prev, dateRange: value as { from: Date | undefined, to: Date | undefined } }))
+      } else {
+      setFilters(prev => ({ ...prev, [key]: value }))
+    }
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      role: '',
+      status: '',
+      department: '',
+      employmentType: '',
+      dateRange: { from: undefined, to: undefined }
+    })
+  }
+
+  const getActiveFiltersCount = () => {
+    let count = 0
+    if (filters.role) count++
+    if (filters.status) count++
+    if (filters.department) count++
+    if (filters.employmentType) count++
+    if (filters.dateRange.from || filters.dateRange.to) count++
+    return count
+  }
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectedUsers.length === getCurrentPageItems().length) {
+      setSelectedUsers([])
+    } else {
+      setSelectedUsers(getCurrentPageItems().map(user => user.id))
+    }
+  }
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedUsers.length === 0) return
+
+    try {
+      setBulkActionLoading(true)
+      
+      switch (action) {
+        case 'sendEmail':
+          // Implement bulk email sending
+          console.log('Sending emails to:', selectedUsers)
+          break
+        case 'changeRole':
+          // Implement bulk role change
+          console.log('Changing roles for:', selectedUsers)
+          break
+        case 'deactivate':
+          // Implement bulk deactivation
+          console.log('Deactivating users:', selectedUsers)
+          break
+        case 'export':
+          // Implement bulk export
+          console.log('Exporting users:', selectedUsers)
+          break
+        case 'delete':
+          // Implement bulk deletion
+          console.log('Deleting users:', selectedUsers)
+          break
+      }
+      
+      // Clear selection after action
+      setSelectedUsers([])
+      setShowBulkActions(false)
+      
+    } catch (error) {
+      console.error('Bulk action error:', error)
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
@@ -200,15 +318,230 @@ export default function UsersPage() {
         </Button>
       </div>
       
-      <div className="mb-6">
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center space-x-4">
                   <Input
-          type="text"
-          placeholder="Search users by name, email, phone, employee ID, position, or department..."
+            type="text"
+            placeholder="Search users by name, email, phone, employee ID, position, or department..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md bg-hr-bg-secondary border-hr-border text-hr-text-primary"
-                  />
+            className="max-w-md bg-hr-bg-secondary border-hr-border text-hr-text-primary"
+          />
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+            {getActiveFiltersCount() > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {getActiveFiltersCount()}
+              </Badge>
+            )}
+          </Button>
+          {getActiveFiltersCount() > 0 && (
+            <Button
+              variant="outline"
+              onClick={clearFilters}
+              className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+            >
+              Clear Filters
+            </Button>
+          )}
+        </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <Card className="bg-hr-bg-secondary border-hr-border">
+            <CardHeader>
+              <CardTitle className="text-hr-text-primary">Advanced Filters</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-hr-text-primary">Role</Label>
+                  <Select value={filters.role} onValueChange={(value) => handleFilterChange('role', value)}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="All Roles" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="">All Roles</SelectItem>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="HR Manager">HR Manager</SelectItem>
+                      <SelectItem value="Employee">Employee</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                <div>
+                  <Label className="text-hr-text-primary">Status</Label>
+                  <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-hr-text-primary">Department</Label>
+                  <Select value={filters.department} onValueChange={(value) => handleFilterChange('department', value)}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="All Departments" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="">All Departments</SelectItem>
+                      <SelectItem value="IT">IT</SelectItem>
+                      <SelectItem value="HR">HR</SelectItem>
+                      <SelectItem value="Finance">Finance</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-hr-text-primary">Employment Type</Label>
+                  <Select value={filters.employmentType} onValueChange={(value) => handleFilterChange('employmentType', value)}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="Full-time">Full-time</SelectItem>
+                      <SelectItem value="Part-time">Part-time</SelectItem>
+                      <SelectItem value="Contract">Contract</SelectItem>
+                      <SelectItem value="Intern">Intern</SelectItem>
+                      <SelectItem value="Freelance">Freelance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-hr-text-primary">Join Date From</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal bg-hr-bg-primary border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.dateRange.from ? filters.dateRange.from.toLocaleDateString() : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-hr-bg-secondary border-hr-border">
+                      <Calendar
+                        mode="single"
+                        selected={filters.dateRange.from}
+                        onSelect={(date) => handleFilterChange('dateRange', { ...filters.dateRange, from: date })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+              </div>
+
+                <div>
+                  <Label className="text-hr-text-primary">Join Date To</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal bg-hr-bg-primary border-hr-border text-hr-text-primary hover:bg-hr-bg-secondary"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.dateRange.to ? filters.dateRange.to.toLocaleDateString() : "Select date"}
+                </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-hr-bg-secondary border-hr-border">
+                      <Calendar
+                        mode="single"
+                        selected={filters.dateRange.to}
+                        onSelect={(date) => handleFilterChange('dateRange', { ...filters.dateRange, to: date })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        )}
+      </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedUsers.length > 0 && (
+        <Card className="bg-hr-primary/10 border-hr-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-hr-text-primary font-medium">
+                  {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedUsers([])}
+                  className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                >
+                  Clear Selection
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkAction('sendEmail')}
+                  disabled={bulkActionLoading}
+                  className="bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkAction('changeRole')}
+                  disabled={bulkActionLoading}
+                  className="bg-green-500 text-white hover:bg-green-600"
+                >
+                  <UserCog className="h-4 w-4 mr-2" />
+                  Change Role
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkAction('deactivate')}
+                  disabled={bulkActionLoading}
+                  className="bg-yellow-500 text-white hover:bg-yellow-600"
+                >
+                  <UserX className="h-4 w-4 mr-2" />
+                  Deactivate
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkAction('export')}
+                  disabled={bulkActionLoading}
+                  className="bg-purple-500 text-white hover:bg-purple-600"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={bulkActionLoading}
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="bg-hr-bg-secondary border-hr-border">
             <CardHeader>
@@ -216,9 +549,38 @@ export default function UsersPage() {
             </CardHeader>
             <CardContent>
           <div className="space-y-4">
+            {/* Select All Header */}
+            <div className="flex items-center space-x-4 p-2 border-b border-hr-border">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSelectAll}
+                className="p-1 h-auto"
+              >
+                {selectedUsers.length === getCurrentPageItems().length && getCurrentPageItems().length > 0 ? (
+                  <CheckSquare className="h-4 w-4 text-hr-primary" />
+                ) : (
+                  <Square className="h-4 w-4 text-hr-text-secondary" />
+                )}
+              </Button>
+              <span className="text-sm text-hr-text-secondary">Select All</span>
+            </div>
+
             {getCurrentPageItems().map((user) => (
               <div key={user.id} className="flex items-center justify-between p-4 border border-hr-border rounded-lg hover:bg-hr-bg-primary transition-colors">
                 <div className="flex items-center space-x-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSelectUser(user.id)}
+                    className="p-1 h-auto"
+                  >
+                    {selectedUsers.includes(user.id) ? (
+                      <CheckSquare className="h-4 w-4 text-hr-primary" />
+                    ) : (
+                      <Square className="h-4 w-4 text-hr-text-secondary" />
+                    )}
+                  </Button>
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt={user.firstName} className="w-12 h-12 rounded-full object-cover" />
