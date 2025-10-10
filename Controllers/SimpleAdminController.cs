@@ -538,26 +538,12 @@ namespace HRManagementSystem.Controllers
                         u.Email,
                         u.FirstName,
                         u.LastName,
-                        u.Phone,
-                        u.EmployeeId,
-                        u.Position,
-                        u.Level,
-                        u.EmploymentType,
-                        u.EmploymentStatus,
-                        u.WorkLocation,
-                        u.JoinDate,
-                        u.LastLoginAt,
-                        u.AvatarUrl,
                         CASE WHEN u.IsActive = 1 THEN 'Active' ELSE 'Inactive' END as Status,
                         COALESCE(r.Name, 'Employee') as RoleName,
-                        COALESCE(d.Name, 'N/A') as DepartmentName,
-                        COALESCE(m.FirstName + ' ' + m.LastName, 'N/A') as ManagerName,
                         u.CreatedAt
                     FROM Users u
                     LEFT JOIN UserRoles ur ON u.Id = ur.UserId
                     LEFT JOIN Roles r ON ur.RoleId = r.Id
-                    LEFT JOIN Departments d ON u.DepartmentId = d.Id
-                    LEFT JOIN Users m ON u.ManagerId = m.Id
                     ORDER BY u.CreatedAt DESC";
 
                 using var command = new SqlCommand(query, connection);
@@ -573,20 +559,20 @@ namespace HRManagementSystem.Controllers
                         Email = reader.GetString("Email"),
                         FirstName = reader.GetString("FirstName"),
                         LastName = reader.GetString("LastName"),
-                        Phone = reader.IsDBNull("Phone") ? "" : reader.GetString("Phone"),
-                        EmployeeId = reader.IsDBNull("EmployeeId") ? "" : reader.GetString("EmployeeId"),
-                        Position = reader.IsDBNull("Position") ? "" : reader.GetString("Position"),
-                        Level = reader.IsDBNull("Level") ? "" : reader.GetString("Level"),
-                        EmploymentType = reader.IsDBNull("EmploymentType") ? "" : reader.GetString("EmploymentType"),
-                        EmploymentStatus = reader.IsDBNull("EmploymentStatus") ? "" : reader.GetString("EmploymentStatus"),
-                        WorkLocation = reader.IsDBNull("WorkLocation") ? "" : reader.GetString("WorkLocation"),
-                        JoinDate = reader.IsDBNull("JoinDate") ? "" : reader.GetDateTime("JoinDate").ToString("yyyy-MM-dd"),
-                        LastLoginAt = reader.IsDBNull("LastLoginAt") ? "" : reader.GetDateTime("LastLoginAt").ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                        AvatarUrl = reader.IsDBNull("AvatarUrl") ? "" : reader.GetString("AvatarUrl"),
+                        Phone = "",
+                        EmployeeId = "",
+                        Position = "",
+                        Level = "",
+                        EmploymentType = "",
+                        EmploymentStatus = "",
+                        WorkLocation = "",
+                        JoinDate = "",
+                        LastLoginAt = "",
+                        AvatarUrl = "",
                         Status = reader.GetString("Status"),
                         RoleName = reader.IsDBNull("RoleName") ? "Employee" : reader.GetString("RoleName"),
-                        DepartmentName = reader.IsDBNull("DepartmentName") ? "N/A" : reader.GetString("DepartmentName"),
-                        ManagerName = reader.IsDBNull("ManagerName") ? "N/A" : reader.GetString("ManagerName"),
+                        DepartmentName = "N/A",
+                        ManagerName = "N/A",
                         CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
                     });
                 }

@@ -70,8 +70,6 @@ export default function UsersPage() {
   const [totalItems, setTotalItems] = useState(0)
   
   const router = useRouter()
-  
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
 
   // Pagination functions
   const getCurrentPageItems = () => {
@@ -171,6 +169,8 @@ export default function UsersPage() {
     (user.Position && user.Position.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (user.DepartmentName && user.DepartmentName.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
 
   if (loading) {
     return (
