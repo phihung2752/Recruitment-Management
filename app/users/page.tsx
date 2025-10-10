@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,6 +36,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -135,9 +137,9 @@ export default function UsersPage() {
         },
         body: JSON.stringify(editFormData),
       })
-
+      
       const data = await response.json()
-
+      
       if (data.success) {
         setEditFormOpen(false)
         setEditingUser(null)
@@ -164,7 +166,7 @@ export default function UsersPage() {
     return (
       <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
+        <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hr-primary mx-auto mb-4"></div>
             <p className="text-hr-text-secondary">Đang tải dữ liệu người dùng...</p>
           </div>
@@ -174,7 +176,7 @@ export default function UsersPage() {
   }
 
   if (error) {
-    return (
+  return (
       <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
@@ -199,20 +201,20 @@ export default function UsersPage() {
       </div>
       
       <div className="mb-6">
-        <Input
+                  <Input
           type="text"
           placeholder="Search users by name, email, phone, employee ID, position, or department..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md bg-hr-bg-secondary border-hr-border text-hr-text-primary"
-        />
-      </div>
+                  />
+                </div>
 
       <Card className="bg-hr-bg-secondary border-hr-border">
-        <CardHeader>
+            <CardHeader>
           <CardTitle className="text-hr-text-primary">Users ({filteredUsers.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
+            </CardHeader>
+            <CardContent>
           <div className="space-y-4">
             {getCurrentPageItems().map((user) => (
               <div key={user.id} className="flex items-center justify-between p-4 border border-hr-border rounded-lg hover:bg-hr-bg-primary transition-colors">
@@ -232,17 +234,17 @@ export default function UsersPage() {
                       </Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-hr-text-secondary">
-                      <div>
+                  <div>
                         <p><strong>Email:</strong> {user.email}</p>
                         <p><strong>Phone:</strong> {user.phone || 'N/A'}</p>
                         <p><strong>Employee ID:</strong> {user.employeeId || 'N/A'}</p>
-                      </div>
-                      <div>
+                  </div>
+                  <div>
                         <p><strong>Position:</strong> {user.position || 'N/A'}</p>
                         <p><strong>Department:</strong> {user.departmentName || 'N/A'}</p>
                         <p><strong>Manager:</strong> {user.managerName || 'N/A'}</p>
                       </div>
-                    </div>
+                  </div>
                     <div className="flex items-center space-x-2 mt-2">
                       <Badge variant="outline" className="text-xs">{user.roleName}</Badge>
                       <Badge variant="outline" className="text-xs">{user.employmentType || 'Full-time'}</Badge>
@@ -252,11 +254,16 @@ export default function UsersPage() {
                           Joined: {new Date(user.joinDate).toLocaleDateString()}
                         </span>
                       )}
-                    </div>
+                  </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button size="sm" variant="outline" title="View Profile">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    title="View Profile"
+                    onClick={() => router.push(`/users/${user.id}`)}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="outline" title="Edit" onClick={() => handleEditUser(user)}>
@@ -283,8 +290,8 @@ export default function UsersPage() {
               <div className="flex items-center justify-between mt-6">
                 <div className="text-sm text-hr-text-secondary">
                   Hiển thị {((currentPage - 1) * itemsPerPage) + 1} đến {Math.min(currentPage * itemsPerPage, filteredUsers.length)} trong tổng số {filteredUsers.length} người dùng
-                </div>
-                <div className="flex items-center space-x-2">
+                  </div>
+                  <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -293,13 +300,13 @@ export default function UsersPage() {
                     className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                  </Button>
+                    </Button>
                   
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
+                    <Button 
                       key={page}
                       variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
+                      size="sm" 
                       onClick={() => handlePageChange(page)}
                       className={currentPage === page ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
                     >
@@ -319,16 +326,16 @@ export default function UsersPage() {
                 </div>
               </div>
             )}
-            
-            {filteredUsers.length === 0 && (
-              <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              
+              {filteredUsers.length === 0 && (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-hr-text-secondary">No users found</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
       {/* Edit User Dialog */}
       <Dialog open={editFormOpen} onOpenChange={setEditFormOpen}>

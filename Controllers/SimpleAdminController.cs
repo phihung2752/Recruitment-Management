@@ -711,8 +711,6 @@ namespace HRManagementSystem.Controllers
                     WorkLocation = @WorkLocation,
                     JoinDate = @JoinDate,
                     AvatarUrl = @AvatarUrl,
-                    DepartmentId = @DepartmentId,
-                    ManagerId = @ManagerId,
                     IsActive = @IsActive,
                     UpdatedAt = GETDATE()
                 WHERE Id = @UserId";
@@ -732,8 +730,6 @@ namespace HRManagementSystem.Controllers
             command.Parameters.AddWithValue("@WorkLocation", request.WorkLocation ?? "");
             command.Parameters.AddWithValue("@JoinDate", string.IsNullOrEmpty(request.JoinDate) ? DBNull.Value : DateTime.Parse(request.JoinDate));
             command.Parameters.AddWithValue("@AvatarUrl", request.AvatarUrl ?? "");
-            command.Parameters.AddWithValue("@DepartmentId", DBNull.Value); // For now, set to null
-            command.Parameters.AddWithValue("@ManagerId", DBNull.Value); // For now, set to null
             command.Parameters.AddWithValue("@IsActive", request.Status == "Active" ? 1 : 0);
 
             await command.ExecuteNonQueryAsync();
