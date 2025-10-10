@@ -71,17 +71,6 @@ export default function UsersPage() {
   
   const router = useRouter()
 
-  // Pagination functions
-  const getCurrentPageItems = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    return filteredUsers.slice(startIndex, endIndex)
-  }
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
   useEffect(() => {
     loadUsers()
   }, [])
@@ -89,20 +78,26 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true)
+      console.log('Loading users...')
       const response = await fetch('/api/users')
       const data = await response.json()
+      
+      console.log('API Response:', data)
       
       if (data.success) {
         setUsers(data.users)
         setTotalItems(data.users.length)
+        console.log('Users loaded:', data.users.length)
       } else {
         setError(data.message || 'Failed to load users')
+        console.error('API Error:', data.message)
       }
     } catch (error) {
       console.error('Error loading users:', error)
       setError('Failed to load users')
     } finally {
       setLoading(false)
+      console.log('Loading finished')
     }
   }
 
@@ -171,6 +166,17 @@ export default function UsersPage() {
   )
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+
+  // Pagination functions
+  const getCurrentPageItems = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredUsers.slice(startIndex, endIndex)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   if (loading) {
     return (
