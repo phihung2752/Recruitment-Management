@@ -532,18 +532,32 @@ namespace HRManagementSystem.Controllers
                 await connection.OpenAsync();
 
                 var query = @"
-                    SELECT 
+                    SELECT
                         u.Id as UserId,
                         u.Username,
                         u.Email,
                         u.FirstName,
                         u.LastName,
+                        u.Phone,
+                        u.EmployeeId,
+                        u.Position,
+                        u.Level,
+                        u.EmploymentType,
+                        u.EmploymentStatus,
+                        u.WorkLocation,
+                        u.JoinDate,
+                        u.LastLoginAt,
+                        u.AvatarUrl,
                         CASE WHEN u.IsActive = 1 THEN 'Active' ELSE 'Inactive' END as Status,
                         COALESCE(r.Name, 'Employee') as RoleName,
+                        COALESCE(d.Name, 'N/A') as DepartmentName,
+                        COALESCE(m.FirstName + ' ' + m.LastName, 'N/A') as ManagerName,
                         u.CreatedAt
                     FROM Users u
                     LEFT JOIN UserRoles ur ON u.Id = ur.UserId
                     LEFT JOIN Roles r ON ur.RoleId = r.Id
+                    LEFT JOIN Departments d ON u.DepartmentId = d.Id
+                    LEFT JOIN Users m ON u.ManagerId = m.Id
                     ORDER BY u.CreatedAt DESC";
 
                 using var command = new SqlCommand(query, connection);
@@ -554,13 +568,25 @@ namespace HRManagementSystem.Controllers
                 {
                     users.Add(new
                     {
-                        UserId = reader.GetString("UserId"),
+                        Id = reader.GetString("UserId"),
                         Username = reader.GetString("Username"),
                         Email = reader.GetString("Email"),
                         FirstName = reader.GetString("FirstName"),
                         LastName = reader.GetString("LastName"),
+                        Phone = reader.IsDBNull("Phone") ? "" : reader.GetString("Phone"),
+                        EmployeeId = reader.IsDBNull("EmployeeId") ? "" : reader.GetString("EmployeeId"),
+                        Position = reader.IsDBNull("Position") ? "" : reader.GetString("Position"),
+                        Level = reader.IsDBNull("Level") ? "" : reader.GetString("Level"),
+                        EmploymentType = reader.IsDBNull("EmploymentType") ? "" : reader.GetString("EmploymentType"),
+                        EmploymentStatus = reader.IsDBNull("EmploymentStatus") ? "" : reader.GetString("EmploymentStatus"),
+                        WorkLocation = reader.IsDBNull("WorkLocation") ? "" : reader.GetString("WorkLocation"),
+                        JoinDate = reader.IsDBNull("JoinDate") ? "" : reader.GetDateTime("JoinDate").ToString("yyyy-MM-dd"),
+                        LastLoginAt = reader.IsDBNull("LastLoginAt") ? "" : reader.GetDateTime("LastLoginAt").ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        AvatarUrl = reader.IsDBNull("AvatarUrl") ? "" : reader.GetString("AvatarUrl"),
                         Status = reader.GetString("Status"),
                         RoleName = reader.IsDBNull("RoleName") ? "Employee" : reader.GetString("RoleName"),
+                        DepartmentName = reader.IsDBNull("DepartmentName") ? "N/A" : reader.GetString("DepartmentName"),
+                        ManagerName = reader.IsDBNull("ManagerName") ? "N/A" : reader.GetString("ManagerName"),
                         CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
                     });
                 }
@@ -704,6 +730,59 @@ namespace HRManagementSystem.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching roles: {Message}", ex.Message);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        [HttpGet("departments")]
+        public async Task<IActionResult> GetDepartments()
+        {
+            try
+            {
+                using var connection = new SqlConnection(GetConnectionString());
+                await connection.OpenAsync();
+
+                var query = @"
+                    SELECT 
+                        d.Id,
+                        d.Name,
+                        d.Description,
+                        d.Location,
+                        d.IsActive,
+                        d.CreatedAt,
+                        COUNT(u.Id) as EmployeeCount,
+                        COALESCE(m.FirstName + ' ' + m.LastName, 'N/A') as ManagerName
+                    FROM Departments d
+                    LEFT JOIN Users u ON d.Id = u.DepartmentId
+                    LEFT JOIN Users m ON d.ManagerId = m.Id
+                    WHERE d.IsActive = 1
+                    GROUP BY d.Id, d.Name, d.Description, d.Location, d.IsActive, d.CreatedAt, m.FirstName, m.LastName
+                    ORDER BY d.Name";
+
+                using var command = new SqlCommand(query, connection);
+                using var reader = await command.ExecuteReaderAsync();
+
+                var departments = new List<object>();
+                while (await reader.ReadAsync())
+                {
+                    departments.Add(new
+                    {
+                        Id = reader.GetString("Id"),
+                        Name = reader.GetString("Name"),
+                        Description = reader.IsDBNull("Description") ? "" : reader.GetString("Description"),
+                        Location = reader.IsDBNull("Location") ? "" : reader.GetString("Location"),
+                        IsActive = reader.GetBoolean("IsActive"),
+                        EmployeeCount = reader.GetInt32("EmployeeCount"),
+                        ManagerName = reader.GetString("ManagerName"),
+                        CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    });
+                }
+
+                return Ok(new { departments });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching departments: {Message}", ex.Message);
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }

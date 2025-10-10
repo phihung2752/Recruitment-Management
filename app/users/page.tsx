@@ -16,17 +16,35 @@ import {
   ArrowLeft,
   Search,
   Filter,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Key,
+  Mail,
+  MoreVertical
 } from "lucide-react"
 
 interface User {
-  UserId: number
+  Id: string
   Username: string
   Email: string
   FirstName: string
   LastName: string
+  Phone: string
+  EmployeeId: string
+  Position: string
+  Level: string
+  EmploymentType: string
+  EmploymentStatus: string
+  WorkLocation: string
+  JoinDate: string
+  LastLoginAt: string
+  AvatarUrl: string
   Status: string
   RoleName: string
+  DepartmentName: string
+  ManagerName: string
   CreatedAt: string
 }
 
@@ -45,7 +63,26 @@ export default function UsersPage() {
     lastName: ""
   })
   const [submitting, setSubmitting] = useState(false)
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(10)
+  const [totalItems, setTotalItems] = useState(0)
+  
   const router = useRouter()
+  
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+
+  // Pagination functions
+  const getCurrentPageItems = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredUsers.slice(startIndex, endIndex)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   useEffect(() => {
     loadUsers()
@@ -59,6 +96,7 @@ export default function UsersPage() {
       
       if (data.success) {
         setUsers(data.users)
+        setTotalItems(data.users.length)
       } else {
         setError(data.message || 'Failed to load users')
       }
@@ -127,7 +165,11 @@ export default function UsersPage() {
     user.Username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.Email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.FirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.LastName.toLowerCase().includes(searchTerm.toLowerCase())
+    user.LastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.Phone && user.Phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.EmployeeId && user.EmployeeId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.Position && user.Position.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.DepartmentName && user.DepartmentName.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   if (loading) {
@@ -289,36 +331,114 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredUsers.map((user) => (
-                <div key={user.UserId} className="flex items-center justify-between p-4 border rounded-lg">
+              {getCurrentPageItems().map((user) => (
+                <div key={user.Id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Users className="h-5 w-5 text-blue-600" />
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      {user.AvatarUrl ? (
+                        <img src={user.AvatarUrl} alt={user.FirstName} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <Users className="h-6 w-6 text-blue-600" />
+                      )}
                     </div>
-                    <div>
-                      <h3 className="font-medium">{user.FirstName} {user.LastName}</h3>
-                      <p className="text-sm text-gray-600">{user.Email}</p>
-                      <p className="text-xs text-gray-500">@{user.Username}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-lg">{user.FirstName} {user.LastName}</h3>
+                        <Badge variant={user.Status === 'Active' ? 'default' : 'secondary'} className="text-xs">
+                          {user.Status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-gray-600">
+                        <div>
+                          <p><strong>Email:</strong> {user.Email}</p>
+                          <p><strong>Phone:</strong> {user.Phone || 'N/A'}</p>
+                          <p><strong>Employee ID:</strong> {user.EmployeeId || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p><strong>Position:</strong> {user.Position || 'N/A'}</p>
+                          <p><strong>Department:</strong> {user.DepartmentName}</p>
+                          <p><strong>Manager:</strong> {user.ManagerName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Badge variant="outline" className="text-xs">{user.RoleName}</Badge>
+                        <Badge variant="outline" className="text-xs">{user.EmploymentType || 'Full-time'}</Badge>
+                        <Badge variant="outline" className="text-xs">{user.WorkLocation || 'HQ'}</Badge>
+                        {user.JoinDate && (
+                          <span className="text-xs text-gray-500">
+                            Joined: {new Date(user.JoinDate).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant={user.Status === 'Active' ? 'default' : 'secondary'}>
-                      {user.Status}
-                    </Badge>
-                    <Badge variant="outline">{user.RoleName}</Badge>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" title="View Profile">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" title="Edit">
                       <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" title="Reset Password">
+                      <Key className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" title="Send Email">
+                      <Mail className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" title="More Actions">
+                      <MoreVertical className="h-4 w-4" />
                     </Button>
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => handleDeleteUser(user.UserId)}
+                      title="Delete"
+                      onClick={() => handleDeleteUser(user.Id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ))}
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6">
+                  <div className="text-sm text-gray-600">
+                    Hiển thị {((currentPage - 1) * itemsPerPage) + 1} đến {Math.min(currentPage * itemsPerPage, filteredUsers.length)} trong tổng số {filteredUsers.length} người dùng
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(page)}
+                        className={currentPage === page ? "bg-hr-primary text-white" : ""}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               {filteredUsers.length === 0 && (
                 <div className="text-center py-8">
