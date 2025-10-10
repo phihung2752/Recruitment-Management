@@ -20,7 +20,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const publicPages = ['/login', '/forgot-password', '/reset-password', '/test', '/simple-login']
   
   // Các trang tạm thời bỏ qua authentication để test
-  const testPages = ['/dashboard', '/candidates', '/job-postings', '/interviews', '/reports', '/analytics', '/settings', '/users', '/test-users']
+  const testPages = ['/dashboard', '/candidates', '/job-postings', '/interviews', '/reports', '/analytics', '/settings', '/users', '/test-users', '/simple-users']
   const isTestPage = testPages.includes(pathname)
   const isPublicPage = publicPages.includes(pathname)
   
