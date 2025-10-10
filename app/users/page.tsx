@@ -66,6 +66,13 @@ export default function UsersPage() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [showBulkActions, setShowBulkActions] = useState(false)
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  
+  // Reset password states
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false)
+  const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -278,6 +285,66 @@ export default function UsersPage() {
     } finally {
       setBulkActionLoading(false)
     }
+  }
+
+  const handleResetPassword = (user: User) => {
+    setResetPasswordUser(user)
+    setNewPassword('')
+    setConfirmPassword('')
+    setResetPasswordOpen(true)
+  }
+
+  const handleConfirmResetPassword = async () => {
+    if (!resetPasswordUser) return
+    
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters long')
+      return
+    }
+
+    try {
+      setResetPasswordLoading(true)
+      
+      const response = await fetch(`/api/users/${resetPasswordUser.id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newPassword }),
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setResetPasswordOpen(false)
+        setResetPasswordUser(null)
+        setNewPassword('')
+        setConfirmPassword('')
+        setError('')
+        // Show success message
+        console.log('Password reset successfully')
+      } else {
+        setError(data.message || 'Failed to reset password')
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error)
+      setError('Failed to reset password')
+    } finally {
+      setResetPasswordLoading(false)
+    }
+  }
+
+  const handleCancelResetPassword = () => {
+    setResetPasswordOpen(false)
+    setResetPasswordUser(null)
+    setNewPassword('')
+    setConfirmPassword('')
+    setError('')
   }
 
   if (loading) {
@@ -631,7 +698,12 @@ export default function UsersPage() {
                   <Button size="sm" variant="outline" title="Edit" onClick={() => handleEditUser(user)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" title="Reset Password">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    title="Reset Password"
+                    onClick={() => handleResetPassword(user)}
+                  >
                     <Key className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="outline" title="Send Email">
@@ -904,6 +976,64 @@ export default function UsersPage() {
               >
                 <Save className="h-4 w-4 mr-2" />
                 {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetPasswordOpen} onOpenChange={setResetPasswordOpen}>
+        <DialogContent className="max-w-md bg-hr-bg-secondary border-hr-border">
+          <DialogHeader>
+            <DialogTitle className="text-hr-text-primary">
+              Reset Password for {resetPasswordUser?.firstName} {resetPasswordUser?.lastName}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="newPassword" className="text-hr-text-primary">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                placeholder="Enter new password"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="confirmPassword" className="text-hr-text-primary">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                placeholder="Confirm new password"
+              />
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-sm">{error}</div>
+            )}
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={handleCancelResetPassword}
+                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmResetPassword}
+                disabled={resetPasswordLoading || !newPassword || !confirmPassword}
+                className="bg-hr-primary text-white hover:bg-hr-primary/90"
+              >
+                {resetPasswordLoading ? 'Resetting...' : 'Reset Password'}
               </Button>
             </div>
           </div>
