@@ -2,41 +2,47 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(
+export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const userId = params.id
-    
-    console.log('Fetching user profile for ID:', userId)
 
-    // Forward to backend API
-    const backendResponse = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
-      method: 'GET',
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: 'User ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Call backend API to delete user
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    const response = await fetch(`${backendUrl}/api/admin/users/${userId}`, {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
     })
 
-    const data = await backendResponse.json()
-    
+    const data = await response.json()
+
     if (data.success) {
-      return NextResponse.json({ 
-        success: true, 
-        user: data.user 
+      return NextResponse.json({
+        success: true,
+        message: 'User deleted successfully'
       })
     } else {
-      return NextResponse.json({ 
-        success: false, 
-        message: data.message || 'Failed to fetch user profile' 
-      }, { status: 404 })
+      return NextResponse.json(
+        { success: false, message: data.message || 'Failed to delete user' },
+        { status: response.status }
+      )
     }
   } catch (error) {
-    console.error('Error fetching user profile:', error)
-    return NextResponse.json({ 
-      success: false, 
-      message: 'Internal server error' 
-    }, { status: 500 })
+    console.error('Error deleting user:', error)
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

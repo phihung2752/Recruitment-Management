@@ -141,7 +141,7 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
     {
       title: "Reports",
       href: "/reports",
-      icon: BarChart3,
+      icon: FileText,
       permission: "report.read",
       group: "analytics"
     },
@@ -170,13 +170,6 @@ export default function Sidebar({ isOpen = false, onClose, isMobile = false }: S
     },
     
     // Administration
-    {
-      title: "User Management",
-      href: "/user-management",
-      icon: UserCog,
-      permission: "user.read",
-      group: "admin"
-    },
     {
       title: "Settings",
       href: "/settings",

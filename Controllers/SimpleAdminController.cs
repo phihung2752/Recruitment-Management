@@ -933,5 +933,53 @@ namespace HRManagementSystem.Controllers
             var result = await command.ExecuteScalarAsync();
             return Convert.ToInt32(result);
         }
+
+        [HttpDelete("users/{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                // Check if user exists
+                var checkQuery = "SELECT COUNT(*) FROM Users WHERE Id = @UserId";
+                using var checkCommand = new SqlCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@UserId", userId);
+                
+                var userExists = (int)await checkCommand.ExecuteScalarAsync() > 0;
+                if (!userExists)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Delete user roles first (foreign key constraint)
+                var deleteRolesQuery = "DELETE FROM UserRoles WHERE UserId = @UserId";
+                using var deleteRolesCommand = new SqlCommand(deleteRolesQuery, connection);
+                deleteRolesCommand.Parameters.AddWithValue("@UserId", userId);
+                await deleteRolesCommand.ExecuteNonQueryAsync();
+
+                // Delete user
+                var deleteUserQuery = "DELETE FROM Users WHERE Id = @UserId";
+                using var deleteUserCommand = new SqlCommand(deleteUserQuery, connection);
+                deleteUserCommand.Parameters.AddWithValue("@UserId", userId);
+                
+                var rowsAffected = await deleteUserCommand.ExecuteNonQueryAsync();
+
+                if (rowsAffected > 0)
+                {
+                    return Ok(new { success = true, message = "User deleted successfully" });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "Failed to delete user" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
+            }
+        }
     }
 }

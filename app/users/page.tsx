@@ -73,6 +73,29 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false)
+  
+  // Add user states
+  const [addUserOpen, setAddUserOpen] = useState(false)
+  const [addUserData, setAddUserData] = useState({
+    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    employeeId: '',
+    position: '',
+    level: '',
+    employmentType: 'Full-time',
+    employmentStatus: 'Active',
+    workLocation: '',
+    joinDate: '',
+    avatarUrl: '',
+    departmentName: '',
+    managerName: '',
+    password: '',
+    confirmPassword: ''
+  })
+  const [addUserLoading, setAddUserLoading] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -347,6 +370,144 @@ export default function UsersPage() {
     setError('')
   }
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Remove user from list
+        setUsers(users.filter(user => user.id !== userId))
+        console.log('User deleted successfully')
+      } else {
+        setError(data.message || 'Failed to delete user')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      setError('Failed to delete user')
+    }
+  }
+
+  const handleAddUser = () => {
+    setAddUserData({
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      employeeId: '',
+      position: '',
+      level: '',
+      employmentType: 'Full-time',
+      employmentStatus: 'Active',
+      workLocation: '',
+      joinDate: '',
+      avatarUrl: '',
+      departmentName: '',
+      managerName: '',
+      password: '',
+      confirmPassword: ''
+    })
+    setAddUserOpen(true)
+  }
+
+  const handleSaveNewUser = async () => {
+    // Validation
+    if (!addUserData.username || !addUserData.email || !addUserData.firstName || !addUserData.lastName) {
+      setError('Username, email, first name, and last name are required')
+      return
+    }
+
+    if (!addUserData.password || addUserData.password.length < 6) {
+      setError('Password must be at least 6 characters long')
+      return
+    }
+
+    if (addUserData.password !== addUserData.confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    try {
+      setAddUserLoading(true)
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addUserData),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setAddUserOpen(false)
+        setAddUserData({
+          username: '',
+          email: '',
+          firstName: '',
+          lastName: '',
+          phone: '',
+          employeeId: '',
+          position: '',
+          level: '',
+          employmentType: 'Full-time',
+          employmentStatus: 'Active',
+          workLocation: '',
+          joinDate: '',
+          avatarUrl: '',
+          departmentName: '',
+          managerName: '',
+          password: '',
+          confirmPassword: ''
+        })
+        loadUsers() // Reload users to show new user
+        setError('')
+      } else {
+        setError(data.message || 'Failed to create user')
+      }
+    } catch (error) {
+      console.error('Error creating user:', error)
+      setError('Failed to create user')
+    } finally {
+      setAddUserLoading(false)
+    }
+  }
+
+  const handleCancelAddUser = () => {
+    setAddUserOpen(false)
+    setAddUserData({
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      employeeId: '',
+      position: '',
+      level: '',
+      employmentType: 'Full-time',
+      employmentStatus: 'Active',
+      workLocation: '',
+      joinDate: '',
+      avatarUrl: '',
+      departmentName: '',
+      managerName: '',
+      password: '',
+      confirmPassword: ''
+    })
+    setError('')
+  }
+
   if (loading) {
     return (
       <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
@@ -368,10 +529,10 @@ export default function UsersPage() {
             <p className="text-red-500 mb-4">Error: {error}</p>
             <Button onClick={loadUsers} className="bg-hr-primary text-white">
               Retry
-            </Button>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
     )
   }
 
@@ -379,7 +540,10 @@ export default function UsersPage() {
     <div className="space-y-6 p-6 bg-hr-bg-primary text-hr-text-primary min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-hr-text-primary">User Management</h1>
-        <Button className="bg-hr-primary text-white hover:bg-hr-primary/90">
+        <Button 
+          onClick={handleAddUser}
+          className="bg-hr-primary text-white hover:bg-hr-primary/90"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add New User
         </Button>
@@ -399,14 +563,14 @@ export default function UsersPage() {
             onClick={() => setShowFilters(!showFilters)}
             className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
           >
-            <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2" />
             Filters
             {getActiveFiltersCount() > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {getActiveFiltersCount()}
               </Badge>
             )}
-          </Button>
+                </Button>
           {getActiveFiltersCount() > 0 && (
             <Button
               variant="outline"
@@ -416,7 +580,7 @@ export default function UsersPage() {
               Clear Filters
             </Button>
           )}
-        </div>
+              </div>
 
         {/* Advanced Filters */}
         {showFilters && (
@@ -426,7 +590,7 @@ export default function UsersPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
+                  <div>
                   <Label className="text-hr-text-primary">Role</Label>
                   <Select value={filters.role} onValueChange={(value) => handleFilterChange('role', value)}>
                     <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
@@ -439,9 +603,9 @@ export default function UsersPage() {
                       <SelectItem value="Employee">Employee</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                  </div>
 
-                <div>
+                  <div>
                   <Label className="text-hr-text-primary">Status</Label>
                   <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
                     <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
@@ -453,9 +617,9 @@ export default function UsersPage() {
                       <SelectItem value="Inactive">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                  </div>
 
-                <div>
+                  <div>
                   <Label className="text-hr-text-primary">Department</Label>
                   <Select value={filters.department} onValueChange={(value) => handleFilterChange('department', value)}>
                     <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
@@ -470,9 +634,9 @@ export default function UsersPage() {
                       <SelectItem value="Sales">Sales</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                  </div>
 
-                <div>
+                  <div>
                   <Label className="text-hr-text-primary">Employment Type</Label>
                   <Select value={filters.employmentType} onValueChange={(value) => handleFilterChange('employmentType', value)}>
                     <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
@@ -510,7 +674,7 @@ export default function UsersPage() {
                       />
                     </PopoverContent>
                   </Popover>
-              </div>
+                  </div>
 
                 <div>
                   <Label className="text-hr-text-primary">Join Date To</Label>
@@ -533,8 +697,8 @@ export default function UsersPage() {
                       />
                     </PopoverContent>
                   </Popover>
-              </div>
-            </div>
+                  </div>
+                </div>
           </CardContent>
         </Card>
         )}
@@ -549,15 +713,15 @@ export default function UsersPage() {
                 <span className="text-hr-text-primary font-medium">
                   {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
                 </span>
-                <Button
-                  variant="outline"
+                  <Button 
+                    variant="outline" 
                   size="sm"
                   onClick={() => setSelectedUsers([])}
                   className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
-                >
+                  >
                   Clear Selection
-                </Button>
-              </div>
+                  </Button>
+                </div>
               <div className="flex items-center space-x-2">
                 <Button
                   size="sm"
@@ -606,16 +770,16 @@ export default function UsersPage() {
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
       <Card className="bg-hr-bg-secondary border-hr-border">
-            <CardHeader>
+          <CardHeader>
           <CardTitle className="text-hr-text-primary">Users ({filteredUsers.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-          <div className="space-y-4">
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
             {/* Select All Header */}
             <div className="flex items-center space-x-4 p-2 border-b border-hr-border">
               <Button
@@ -635,7 +799,7 @@ export default function UsersPage() {
 
             {getCurrentPageItems().map((user) => (
               <div key={user.id} className="flex items-center justify-between p-4 border border-hr-border rounded-lg hover:bg-hr-bg-primary transition-colors">
-                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-4">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -654,7 +818,7 @@ export default function UsersPage() {
                     ) : (
                       <Users className="h-6 w-6 text-blue-600" />
                     )}
-                  </div>
+                    </div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <h3 className="font-medium text-lg text-hr-text-primary">{user.firstName} {user.lastName}</h3>
@@ -663,7 +827,7 @@ export default function UsersPage() {
                       </Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-hr-text-secondary">
-                  <div>
+                    <div>
                         <p><strong>Email:</strong> {user.email}</p>
                         <p><strong>Phone:</strong> {user.phone || 'N/A'}</p>
                         <p><strong>Employee ID:</strong> {user.employeeId || 'N/A'}</p>
@@ -684,9 +848,9 @@ export default function UsersPage() {
                         </span>
                       )}
                   </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2">
                   <Button 
                     size="sm" 
                     variant="outline" 
@@ -696,11 +860,11 @@ export default function UsersPage() {
                     <Eye className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="outline" title="Edit" onClick={() => handleEditUser(user)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
                     title="Reset Password"
                     onClick={() => handleResetPassword(user)}
                   >
@@ -712,12 +876,18 @@ export default function UsersPage() {
                   <Button size="sm" variant="outline" title="More Actions">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline" title="Delete">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive" 
+                    title="Delete" 
+                    onClick={() => handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`)}
+                    className="bg-red-500 text-white hover:bg-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
             
             {/* Pagination */}
             {totalPages > 1 && (
@@ -736,29 +906,137 @@ export default function UsersPage() {
                     <ChevronLeft className="h-4 w-4" />
                     </Button>
                   
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  {(() => {
+                    const pages = []
+                    const maxVisiblePages = 5
+                    
+                    if (totalPages <= maxVisiblePages) {
+                      // Show all pages if total is small
+                      for (let i = 1; i <= totalPages; i++) {
+                        pages.push(
+                          <Button 
+                            key={i}
+                            variant={currentPage === i ? "default" : "outline"}
+                            size="sm" 
+                            onClick={() => handlePageChange(i)}
+                            className={currentPage === i ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
+                          >
+                            {i}
+                          </Button>
+                        )
+                      }
+                    } else {
+                      // Show smart pagination
+                      if (currentPage <= 3) {
+                        // Show first 3 pages + ... + last page
+                        for (let i = 1; i <= 3; i++) {
+                          pages.push(
+                            <Button 
+                              key={i}
+                              variant={currentPage === i ? "default" : "outline"}
+                              size="sm" 
+                              onClick={() => handlePageChange(i)}
+                              className={currentPage === i ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
+                            >
+                              {i}
+                            </Button>
+                          )
+                        }
+                        pages.push(<span key="ellipsis1" className="px-2 text-hr-text-secondary">...</span>)
+                        pages.push(
+                          <Button 
+                            key={totalPages}
+                            variant={currentPage === totalPages ? "default" : "outline"}
+                            size="sm" 
+                            onClick={() => handlePageChange(totalPages)}
+                            className={currentPage === totalPages ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
+                          >
+                            {totalPages}
+                          </Button>
+                        )
+                      } else if (currentPage >= totalPages - 2) {
+                        // Show first page + ... + last 3 pages
+                        pages.push(
+                          <Button 
+                            key={1}
+                            variant="outline"
+                            size="sm" 
+                            onClick={() => handlePageChange(1)}
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                          >
+                            1
+                          </Button>
+                        )
+                        pages.push(<span key="ellipsis2" className="px-2 text-hr-text-secondary">...</span>)
+                        for (let i = totalPages - 2; i <= totalPages; i++) {
+                          pages.push(
+                            <Button 
+                              key={i}
+                              variant={currentPage === i ? "default" : "outline"}
+                              size="sm" 
+                              onClick={() => handlePageChange(i)}
+                              className={currentPage === i ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
+                            >
+                              {i}
+                            </Button>
+                          )
+                        }
+                      } else {
+                        // Show first page + ... + current-1, current, current+1 + ... + last page
+                        pages.push(
+                          <Button 
+                            key={1}
+                            variant="outline"
+                            size="sm" 
+                            onClick={() => handlePageChange(1)}
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                          >
+                            1
+                          </Button>
+                        )
+                        pages.push(<span key="ellipsis3" className="px-2 text-hr-text-secondary">...</span>)
+                        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                          pages.push(
+                            <Button 
+                              key={i}
+                              variant={currentPage === i ? "default" : "outline"}
+                              size="sm" 
+                              onClick={() => handlePageChange(i)}
+                              className={currentPage === i ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
+                            >
+                              {i}
+                            </Button>
+                          )
+                        }
+                        pages.push(<span key="ellipsis4" className="px-2 text-hr-text-secondary">...</span>)
+                        pages.push(
                     <Button 
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
+                            key={totalPages}
+                            variant="outline"
                       size="sm" 
-                      onClick={() => handlePageChange(page)}
-                      className={currentPage === page ? "bg-hr-primary text-white" : "border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"}
-                    >
-                      {page}
-                    </Button>
-                  ))}
+                            onClick={() => handlePageChange(totalPages)}
+                            className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+                          >
+                            {totalPages}
+                          </Button>
+                        )
+                      }
+                      
+                      return pages
+                    })()}
+                  })}
                   
                   <Button
-                    variant="outline"
+                      variant="outline"
                     size="sm"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
-                  >
+                    >
                     <ChevronRight className="h-4 w-4" />
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
-              </div>
             )}
               
               {filteredUsers.length === 0 && (
@@ -791,7 +1069,7 @@ export default function UsersPage() {
                     onChange={(e) => setEditFormData({...editFormData, firstName: e.target.value})}
                     className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
                   />
-                </div>
+    </div>
                 <div>
                   <Label htmlFor="lastName" className="text-hr-text-primary">Last Name</Label>
                   <Input
@@ -1034,6 +1312,244 @@ export default function UsersPage() {
                 className="bg-hr-primary text-white hover:bg-hr-primary/90"
               >
                 {resetPasswordLoading ? 'Resetting...' : 'Reset Password'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-hr-bg-secondary border-hr-border">
+          <DialogHeader>
+            <DialogTitle className="text-hr-text-primary">Add New User</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-hr-text-primary">Basic Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="add-username" className="text-hr-text-primary">Username *</Label>
+                  <Input
+                    id="add-username"
+                    value={addUserData.username}
+                    onChange={(e) => setAddUserData({...addUserData, username: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-email" className="text-hr-text-primary">Email *</Label>
+                  <Input
+                    id="add-email"
+                    type="email"
+                    value={addUserData.email}
+                    onChange={(e) => setAddUserData({...addUserData, email: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-firstName" className="text-hr-text-primary">First Name *</Label>
+                  <Input
+                    id="add-firstName"
+                    value={addUserData.firstName}
+                    onChange={(e) => setAddUserData({...addUserData, firstName: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-lastName" className="text-hr-text-primary">Last Name *</Label>
+                  <Input
+                    id="add-lastName"
+                    value={addUserData.lastName}
+                    onChange={(e) => setAddUserData({...addUserData, lastName: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-phone" className="text-hr-text-primary">Phone</Label>
+                  <Input
+                    id="add-phone"
+                    value={addUserData.phone}
+                    onChange={(e) => setAddUserData({...addUserData, phone: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-password" className="text-hr-text-primary">Password *</Label>
+                  <Input
+                    id="add-password"
+                    type="password"
+                    value={addUserData.password}
+                    onChange={(e) => setAddUserData({...addUserData, password: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-confirmPassword" className="text-hr-text-primary">Confirm Password *</Label>
+                  <Input
+                    id="add-confirmPassword"
+                    type="password"
+                    value={addUserData.confirmPassword}
+                    onChange={(e) => setAddUserData({...addUserData, confirmPassword: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Work Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-hr-text-primary">Work Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="add-employeeId" className="text-hr-text-primary">Employee ID</Label>
+                  <Input
+                    id="add-employeeId"
+                    value={addUserData.employeeId}
+                    onChange={(e) => setAddUserData({...addUserData, employeeId: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-position" className="text-hr-text-primary">Position</Label>
+                  <Input
+                    id="add-position"
+                    value={addUserData.position}
+                    onChange={(e) => setAddUserData({...addUserData, position: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-level" className="text-hr-text-primary">Level</Label>
+                  <Select value={addUserData.level} onValueChange={(value) => setAddUserData({...addUserData, level: value})}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="Junior">Junior</SelectItem>
+                      <SelectItem value="Mid-level">Mid-level</SelectItem>
+                      <SelectItem value="Senior">Senior</SelectItem>
+                      <SelectItem value="Lead">Lead</SelectItem>
+                      <SelectItem value="Manager">Manager</SelectItem>
+                      <SelectItem value="Director">Director</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="add-employmentType" className="text-hr-text-primary">Employment Type</Label>
+                  <Select value={addUserData.employmentType} onValueChange={(value) => setAddUserData({...addUserData, employmentType: value})}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="Select employment type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="Full-time">Full-time</SelectItem>
+                      <SelectItem value="Part-time">Part-time</SelectItem>
+                      <SelectItem value="Contract">Contract</SelectItem>
+                      <SelectItem value="Intern">Intern</SelectItem>
+                      <SelectItem value="Freelance">Freelance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="add-employmentStatus" className="text-hr-text-primary">Employment Status</Label>
+                  <Select value={addUserData.employmentStatus} onValueChange={(value) => setAddUserData({...addUserData, employmentStatus: value})}>
+                    <SelectTrigger className="bg-hr-bg-primary border-hr-border text-hr-text-primary">
+                      <SelectValue placeholder="Select employment status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-hr-bg-secondary border-hr-border">
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                      <SelectItem value="Probation">Probation</SelectItem>
+                      <SelectItem value="Notice Period">Notice Period</SelectItem>
+                      <SelectItem value="Resigned">Resigned</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="add-workLocation" className="text-hr-text-primary">Work Location</Label>
+                  <Input
+                    id="add-workLocation"
+                    value={addUserData.workLocation}
+                    onChange={(e) => setAddUserData({...addUserData, workLocation: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-joinDate" className="text-hr-text-primary">Join Date</Label>
+                  <Input
+                    id="add-joinDate"
+                    type="date"
+                    value={addUserData.joinDate}
+                    onChange={(e) => setAddUserData({...addUserData, joinDate: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-hr-text-primary">Additional Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="add-departmentName" className="text-hr-text-primary">Department</Label>
+                  <Input
+                    id="add-departmentName"
+                    value={addUserData.departmentName}
+                    onChange={(e) => setAddUserData({...addUserData, departmentName: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-managerName" className="text-hr-text-primary">Manager</Label>
+                  <Input
+                    id="add-managerName"
+                    value={addUserData.managerName}
+                    onChange={(e) => setAddUserData({...addUserData, managerName: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-avatarUrl" className="text-hr-text-primary">Avatar URL</Label>
+                  <Input
+                    id="add-avatarUrl"
+                    value={addUserData.avatarUrl}
+                    onChange={(e) => setAddUserData({...addUserData, avatarUrl: e.target.value})}
+                    className="bg-hr-bg-primary border-hr-border text-hr-text-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-sm">{error}</div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-2 pt-4 border-t border-hr-border">
+              <Button
+                variant="outline"
+                onClick={handleCancelAddUser}
+                className="border-hr-border text-hr-text-primary hover:bg-hr-bg-primary"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveNewUser}
+                disabled={addUserLoading}
+                className="bg-hr-primary text-white hover:bg-hr-primary/90"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {addUserLoading ? 'Creating...' : 'Create User'}
               </Button>
             </div>
           </div>
