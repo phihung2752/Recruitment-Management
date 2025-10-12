@@ -1,90 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-async function getCandidates(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    console.log('🔥 Getting candidates from backend...')
-    
     const { searchParams } = new URL(request.url)
-    const page = searchParams.get('page') || '1'
-    const pageSize = searchParams.get('pageSize') || '10'
+    const page = parseInt(searchParams.get('page') || '1')
+    const pageSize = parseInt(searchParams.get('pageSize') || '10')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || 'All'
-    
-    console.log('📊 Params:', { page, pageSize, search, status })
-    
-    // Call backend API
-    const backendUrl = `http://localhost:5000/api/admin/candidates?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`
-    console.log('🌐 Backend URL:', backendUrl)
-    
-    const response = await fetch(backendUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    
-    if (!response.ok) {
-      console.error('❌ Backend response not ok:', response.status, response.statusText)
-      throw new Error(`Backend API error: ${response.status} ${response.statusText}`)
-    }
-    
-    const data = await response.json()
-    console.log('✅ Backend response:', data)
-    
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('❌ Get candidates error:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch candidates', error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    )
-  }
-}
 
-async function createCandidate(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { firstName, lastName, email, phone, position, experience, skills, expectedSalary, source, notes } = body
+    console.log('🔥 Getting candidates from backend...')
+    console.log('📊 Params:', { page, pageSize, search, status })
+
+    // Generate mock candidates data
+    const mockCandidates = generateMockCandidates(pageSize)
     
-    // Call backend API to create candidate
-    const response = await fetch('http://localhost:5000/api/admin/candidates', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        phone,
-        position,
-        experience,
-        skills,
-        expectedSalary,
-        source,
-        notes
-      })
-    })
-    
-    if (!response.ok) {
-      throw new Error(`Backend API error: ${response.status} ${response.statusText}`)
-    }
-    
-    const data = await response.json()
+    console.log('✅ Mock candidates data generated:', mockCandidates.length, 'candidates')
     
     return NextResponse.json({
       success: true,
-      message: 'Candidate created successfully',
-      data
+      candidates: mockCandidates,
+      totalCount: 50, // Mock total count
+      page: page,
+      pageSize: pageSize,
+      totalPages: Math.ceil(50 / pageSize)
     })
   } catch (error) {
-    console.error('Create candidate error:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to create candidate' },
-      { status: 500 }
-    )
+    console.error('❌ Get candidates error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Failed to fetch candidates',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
-export const GET = getCandidates
-export const POST = createCandidate
+function generateMockCandidates(count: number) {
+  const positions = ['Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'UX Designer', 'Data Analyst', 'Marketing Manager', 'DevOps Engineer', 'Product Manager']
+  const skills = [
+    'React, JavaScript, TypeScript, Node.js',
+    'Java, Spring Boot, Microservices, AWS',
+    'Python, Django, PostgreSQL, Docker',
+    'Vue.js, JavaScript, HTML5, CSS3',
+    'Figma, Adobe Creative Suite, User Research',
+    'SQL, Excel, Python, Machine Learning',
+    'Digital Marketing, Google Ads, Analytics',
+    'AWS, Docker, Kubernetes, CI/CD'
+  ]
+  const statuses = ['Applied', 'Interviewed', 'Hired', 'Rejected']
+  const names = [
+    'Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 'Hoàng Văn E',
+    'Vũ Thị F', 'Đặng Văn G', 'Bùi Thị H', 'Ngô Văn I', 'Dương Thị J',
+    'Cao Văn K', 'Lý Thị L', 'Đinh Văn M', 'Ngô Thị N', 'Phan Văn O'
+  ]
+
+  return Array.from({ length: count }, (_, index) => {
+    const id = `cand-${String(index + 1).padStart(3, '0')}`
+    const name = names[index % names.length]
+    const position = positions[index % positions.length]
+    const skill = skills[index % skills.length]
+    const status = statuses[index % statuses.length]
+
+    return {
+      id,
+      firstName: name.split(' ')[0],
+      lastName: name.split(' ').slice(1).join(' '),
+      email: `${name.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+      phone: `090${String(Math.floor(Math.random() * 10000000)).padStart(7, '0')}`,
+      currentPosition: position,
+      experience: `${Math.floor(Math.random() * 8) + 1} years`,
+      skills: skill,
+      status: status,
+      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  })
+}

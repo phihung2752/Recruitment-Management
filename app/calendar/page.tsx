@@ -125,12 +125,7 @@ export default function CalendarPage() {
       try {
         setLoading(true)
         const token = localStorage.getItem('token')
-        const response = await fetch('/api/calendar/events', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        const response = await fetch('/api/calendar')
 
         if (response.ok) {
           const data = await response.json()
@@ -444,6 +439,8 @@ export default function CalendarPage() {
           </div>
         ))}
         {days.map(day => {
+          if (!day) return null
+          
           const dayEvents = filteredEvents.filter(event => 
             isSameDay(new Date(event.date), day)
           )

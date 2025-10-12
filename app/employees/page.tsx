@@ -116,12 +116,7 @@ export default function EmployeesPage() {
       try {
         setLoading(true)
         const token = localStorage.getItem('token')
-        const response = await fetch('/api/employees', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        const response = await fetch('/api/employees')
 
         if (response.ok) {
           const data = await response.json()

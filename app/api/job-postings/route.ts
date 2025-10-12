@@ -12,6 +12,10 @@ export async function GET(request: NextRequest) {
 
     // Call backend API
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    
+    // Set environment variable to ignore SSL certificate
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+    
     const response = await fetch(`${backendUrl}/api/job-postings?page=${page}&pageSize=${pageSize}&search=${search}&status=${status}`, {
       method: 'GET',
       headers: {

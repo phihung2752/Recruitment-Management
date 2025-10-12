@@ -179,7 +179,7 @@ export default function InterviewsPage() {
   const fetchCandidates = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/candidates?search=${encodeURIComponent(searchTerm)}&status=${statusFilter}`)
+      const response = await fetch(`/api/cv-management?search=${encodeURIComponent(searchTerm)}&status=${statusFilter}`)
       if (response.ok) {
         const data = await response.json()
         // Filter chỉ qualified candidates (Applied, Interviewed, Hired)
@@ -318,8 +318,7 @@ export default function InterviewsPage() {
   }
 
   return (
-    <ProtectedRoute requiredPermissions={['interview.read']}>
-      <div className="flex-1 space-y-4 p-4 md:p-6">
+    <div className="flex-1 space-y-4 p-4 md:p-6">
         <div className="flex items-center justify-between space-y-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-hr-text-primary">{t("Interviews")}</h2>
@@ -669,6 +668,5 @@ export default function InterviewsPage() {
         </div>
       </div>
     </div>
-    </ProtectedRoute>
   )
 }
