@@ -337,7 +337,7 @@ function generateDefaultResponse() {
 }
 
 function generateSuggestions(intent: string) {
-  const suggestions = {
+  const suggestions: { [key: string]: string[] } = {
     greeting: [
       "Show me candidates",
       "Help with interviews",
@@ -392,7 +392,7 @@ function generateSuggestions(intent: string) {
 }
 
 function generateActions(intent: string, context: any) {
-  const actions = {
+  const actions: { [key: string]: { type: string; label: string; url: string; }[] } = {
     candidate_help: [
       { type: 'navigate', label: 'View Candidates', url: '/candidates' },
       { type: 'navigate', label: 'CV Management', url: '/cv-management' }

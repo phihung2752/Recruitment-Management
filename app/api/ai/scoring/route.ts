@@ -63,6 +63,15 @@ function calculateAIScores(cvData: any, jobRequirements: any, criteria: any) {
   // Match Quality
   const matchQuality = calculateMatchQuality(overallScore, riskFactors)
   
+  // Create scores object for AI insights
+  const scores = {
+    technical: technicalScore,
+    experience: experienceScore,
+    education: educationScore,
+    languages: languageScore,
+    projects: projectScore
+  }
+  
   return {
     overall: {
       score: overallScore,
@@ -144,8 +153,8 @@ function calculateEducationScore(education: any, requiredEducation: any) {
     'phd': 5
   }
   
-  const candidateLevel = educationLevels[education.degree?.toLowerCase()] || 0
-  const requiredLevel = educationLevels[requiredEducation.degree?.toLowerCase()] || 0
+  const candidateLevel = educationLevels[education.degree?.toLowerCase() as keyof typeof educationLevels] || 0
+  const requiredLevel = educationLevels[requiredEducation.degree?.toLowerCase() as keyof typeof educationLevels] || 0
   
   if (candidateLevel >= requiredLevel) {
     return 100

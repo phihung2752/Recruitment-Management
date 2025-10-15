@@ -10,27 +10,10 @@ export async function GET(request: NextRequest) {
 
     console.log('🔥 API: Fetching job postings...', { page, pageSize, search, status })
 
-    // Call backend API
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    // Use mock data directly
+    console.log('✅ Using mock data for job postings')
     
-    // Set environment variable to ignore SSL certificate
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-    
-    const response = await fetch(`${backendUrl}/api/job-postings?page=${page}&pageSize=${pageSize}&search=${search}&status=${status}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      console.log('✅ API: Job postings fetched successfully')
-      return NextResponse.json(data)
-    } else {
-      console.log('❌ Backend not available, using mock data')
-      
-      // Mock data fallback
+    // Mock data
       const mockData = {
         jobPostings: [
           {
@@ -89,7 +72,6 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(mockData)
-    }
   } catch (error) {
     console.error('❌ API Error:', error)
     return NextResponse.json(

@@ -145,7 +145,7 @@ async function sendMeetingInvitation(data: any) {
     return await emailResponse.json()
   } catch (error) {
     console.error('Email sending error:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 

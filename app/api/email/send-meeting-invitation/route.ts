@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     } = await request.json()
     
     // Create transporter
-    const transporter = nodemailer.createTransporter(GMAIL_CONFIG)
+    const transporter = nodemailer.createTransport(GMAIL_CONFIG)
     
     // Format start time
     const meetingDate = new Date(startTime)

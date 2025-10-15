@@ -59,7 +59,7 @@ We are seeking a skilled ${data.title} with ${data.experience} years of experien
 - Contribute to architectural decisions
 
 ## Required Skills
-- ${data.skills.map(skill => `- ${skill}`).join('\n')}
+- ${data.skills.map((skill: string) => `- ${skill}`).join('\n')}
 - Strong problem-solving abilities
 - Excellent communication skills
 - Experience with agile methodologies
